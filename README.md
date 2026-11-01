@@ -44,7 +44,26 @@ Every slide is normalized into three actionable, color-coded blocks:
 - 🟢 **How It Was Fixed (Countermeasure):** ECN engineering fix, closed-cell foam addition, continuous sealant paths, and pilot-flange bolts.
 - 🟡 **What to Check on the Line (Inspection Standard):** Specific, unambiguous check points (e.g., *verify 70mm clearance to butyl line*, *confirm audible double-click*, *360° gloved sweep*).
 
-### 2. ⚡ High-Speed Multi-Criteria Search & Filter
+### 2. 📐 Bespoke Technical CAD Schematics (Human-Crafted Engineering Vectors)
+Unlike cookie-cutter AI cards, every component category features an authentic 1:1 scale vector CAD cross-section diagram:
+- **Wire Harness Clips & Fasteners:** EPT foam washer deflection under sheet metal clamping load.
+- **Door Sealing Screens:** 70 mm service clearance zone with non-curing butyl bead adhesive boundary.
+- **Floor & Underbody Plugs:** 360° e-coat drain plug flush interference seating with underbody stone chip wax.
+- **Cowl & Water Box Bulkhead:** Minimum 37 mm water stopper weir height and continuous X-axis overflow runout.
+- **Glass Runners & Weatherstrips:** Dual aero lip capillary arrest geometry and drain weep slots.
+- **Rear Lamps & Lenses:** Pre-compressed glue bead and 4–6 bar pneumatic seal interlock.
+
+### 3. 🔀 Dual Display Modes: Visual Cards vs. Quality Matrix Table
+- **Visual Cards View:** Rich overview cards featuring 3-step color blocks, CAD cross-sections, and instant verify toggles.
+- **Dense Quality Matrix (Table View):** High-density industrial table optimized for desktop quality engineering audits, featuring sortable columns, slide numbers, program tags, and quick-open sheet triggers. Switch seamlessly between modes with the persistent view toggle.
+
+### 4. 🗂️ Slide-Over Inspector Drawer & Keyboard Shortcuts
+- **Side Drawer Inspection:** Clicking any lesson opens a full-height inspection drawer with complete multi-tier root causes, countermeasure points, interactive verification checkboxes, document reference copier, and quality sheet print formatting.
+- **Keyboard Shortcuts:**
+  - Press `/` anywhere to focus the global search bar.
+  - Press `Esc` to instantly close drawers and barcode scanning modals.
+
+### 5. ⚡ High-Speed Multi-Criteria Search & Filter
 - **Instant Search:** Queries slide numbers, document references, component names (`clip`, `butyl`, `plug`, `grommet`, `speaker`), failure modes, and clearances.
 - **Filter Chips:** One-tap filtering for common failure modes:
   - `All Lessons (76)`

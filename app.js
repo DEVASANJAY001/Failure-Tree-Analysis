@@ -1,54 +1,68 @@
 /**
- * LeakGuard LLR - Water Leak Knowledge & Line Portal
- * High-Performance Enterprise Industrial UI/UX Engine
+ * LeakGuard LLR — Water Leak Knowledge & Shopfloor Portal
+ * Human-Crafted Automotive Quality Engineering System
+ * Digital Check Review (LLR) Engine for Renault-Nissan RNTBCI Standards
  */
 
 (function () {
   'use strict';
 
-  // Storage keys
-  const STORAGE_KEY = 'LEAKGUARD_LESSONS_DATA_V2';
-  const VERIFIED_KEY = 'LEAKGUARD_VERIFIED_SLIDES_V2';
-  const CHECKLIST_KEY = 'LEAKGUARD_STATION_CHECKS_V2';
-  const DEFECTS_KEY = 'LEAKGUARD_DEFECT_LOGS_V2';
-  const THEME_KEY = 'LEAKGUARD_THEME_MODE';
+  // Local storage keys
+  const STORAGE_KEY = 'LEAKGUARD_LESSONS_DATA_V3';
+  const VERIFIED_KEY = 'LEAKGUARD_VERIFIED_SLIDES_V3';
+  const CHECKLIST_KEY = 'LEAKGUARD_STATION_CHECKS_V3';
+  const DEFECTS_KEY = 'LEAKGUARD_DEFECT_LOGS_V3';
+  const THEME_KEY = 'LEAKGUARD_THEME_MODE_V3';
+  const VIEW_MODE_KEY = 'LEAKGUARD_VIEW_MODE'; // 'cards' | 'table'
 
-  // State
+  // Application State
   let lessons = [];
   let currentFilter = 'all';
   let currentProjectFilter = 'all';
   let currentSearchQuery = '';
   let activeTab = 'lessons-browser';
+  let activeSubView = localStorage.getItem(VIEW_MODE_KEY) || 'cards';
   let currentDetailSlide = null;
   let verifiedSlides = new Set();
   let stationChecks = {};
   let defectLogs = [];
 
+  // Project Code Mapping with full commercial vehicle names
+  const PROJECT_NAMES = {
+    'PY1B': 'Kiger (PY1B)',
+    'HBC': 'Magnite / Kiger (HBC)',
+    'RBC': 'Triber (RBC)',
+    'XBA': 'Kwid (XBA)',
+    'PB1D': 'Duster (PB1D)',
+    'HHA': 'Captur (HHA)',
+    'I2': 'Concept (I2)'
+  };
+
+  // 17 Inspection Zones Config
+  const ZONE_CONFIG = [
+    { id: 'doors', name: 'Front & Rear Doors', count: 18, risk: 'Butyl bead gap / Clip foam pinch', group: 'doors high-risk', icon: 'sensor_door', station: 'Station 06 · Trim Line' },
+    { id: 'floor', name: 'Floor Pan & Underbody', count: 11, risk: 'Unseated oval e-coat drainage plugs', group: 'underbody', icon: 'layers', station: 'Station 04 · Underbody' },
+    { id: 'cowl', name: 'Cowl & Firewall', count: 9, risk: 'Pass-through grommet lip roll-under', group: 'cowl high-risk', icon: 'speed', station: 'Station 02 · Engine Deck' },
+    { id: 'tailgate', name: 'Tailgate & Liftgate', count: 8, risk: 'Camera harness conduit unclipped', group: 'tailgate', icon: 'luggage', station: 'Station 08 · Rear Final' },
+    { id: 'roof', name: 'Roof & Sunroof', count: 7, risk: 'Rear pillar drain hose pinch', group: 'roof', icon: 'roofing', station: 'Station 05 · Overhead' },
+    { id: 'windshield', name: 'A-Pillar & Windshield', count: 6, risk: 'Urethane overlap void at header', group: 'windshield', icon: 'branding_watermark', station: 'Station 03 · Glazing Cell' },
+    { id: 'quarter', name: 'Quarter Glass & C-Pillar', count: 5, risk: 'Primer skip on sharp inner radii', group: 'quarter', icon: 'crop_square', station: 'Station 07 · Fixed Glass' },
+    { id: 'hvac', name: 'HVAC & Bulkhead', count: 4, risk: 'Condensate spout body misalignment', group: 'cowl', icon: 'mode_fan', station: 'Station 02 · Cockpit' },
+    { id: 'wheelhouse', name: 'Wheelhouse & Arch Liners', count: 5, risk: 'Seam sealer skip on panel overlap', group: 'underbody', icon: 'tire_repair', station: 'Station 01 · Body Seal' },
+    { id: 'bpillar', name: 'B-Pillar & Rocker Sill', count: 6, risk: 'Rocker drain flap sealed by wax', group: 'doors', icon: 'view_column', station: 'Station 06 · Side Sill' },
+    { id: 'fuel', name: 'Fuel / Charge Pocket', count: 3, risk: 'Overspill drain pinched in flange', group: 'quarter', icon: 'local_gas_station', station: 'Station 08 · Fuel Port' },
+    { id: 'lamps', name: 'Rear Combination Lamps', count: 4, risk: 'Missing foam washer under stud', group: 'tailgate', icon: 'light_mode', station: 'Station 09 · Lighting' },
+    { id: 'ditch', name: 'Roof Ditch Rails & Mounts', count: 3, risk: 'Expansion sealer crack in weld', group: 'roof', icon: 'dehaze', station: 'Station 05 · BIW Roof' },
+    { id: 'core', name: 'Front Core & Hood Latch', count: 2, risk: 'Release cable grommet unseated', group: 'cowl', icon: 'view_sidebar', station: 'Station 02 · Front End' },
+    { id: 'exhausters', name: 'Cabin Pressure Exhausters', count: 3, risk: 'Rubber flap sticky or missing', group: 'quarter', icon: 'air', station: 'Station 08 · Bumper Area' },
+    { id: 'evtray', name: 'EV High-Voltage Tray Gasket', count: 2, risk: 'Continuous perimeter bead skip', group: 'underbody', icon: 'bolt', station: 'Station 04 · EV Battery' },
+    { id: 'wiper', name: 'Rear Backlite & Wiper Shaft', count: 2, risk: 'Spindle seal flange deformation', group: 'tailgate', icon: 'aspect_ratio', station: 'Station 08 · Wiper Line' }
+  ];
+
   // DOM Elements cache
   const el = {};
 
-  // Zone Definitions for rich display
-  const ZONE_CONFIG = [
-    { id: 'doors', name: 'Front & Rear Doors', count: 18, risk: 'Butyl bead gap / Clip foam pinch', group: 'doors high-risk', icon: 'sensor_door', color: 'rose' },
-    { id: 'floor', name: 'Floor Pan & Underbody', count: 11, risk: 'Unseated oval e-coat drainage plugs', group: 'underbody', icon: 'layers', color: 'sky' },
-    { id: 'cowl', name: 'Cowl & Firewall', count: 9, risk: 'Pass-through grommet lip roll-under', group: 'cowl high-risk', icon: 'speed', color: 'amber' },
-    { id: 'tailgate', name: 'Tailgate & Liftgate', count: 8, risk: 'Camera harness conduit unclipped', group: 'tailgate', icon: 'luggage', color: 'indigo' },
-    { id: 'roof', name: 'Roof & Sunroof', count: 7, risk: 'Rear pillar drain hose pinch', group: 'roof', icon: 'roofing', color: 'sky' },
-    { id: 'windshield', name: 'A-Pillar & Windshield', count: 6, risk: 'Urethane overlap void at header', group: 'windshield', icon: 'branding_watermark', color: 'blue' },
-    { id: 'quarter', name: 'Quarter Glass & C-Pillar', count: 5, risk: 'Primer skip on sharp inner radii', group: 'quarter', icon: 'crop_square', color: 'cyan' },
-    { id: 'hvac', name: 'HVAC & Bulkhead', count: 4, risk: 'Condensate spout body misalignment', group: 'cowl', icon: 'mode_fan', color: 'amber' },
-    { id: 'wheelhouse', name: 'Wheelhouse & Arch Liners', count: 5, risk: 'Seam sealer skip on panel overlap', group: 'underbody', icon: 'tire_repair', color: 'slate' },
-    { id: 'bpillar', name: 'B-Pillar & Rocker Sill', count: 6, risk: 'Rocker drain flap sealed by wax', group: 'doors', icon: 'view_column', color: 'blue' },
-    { id: 'fuel', name: 'Fuel / Charge Pocket', count: 3, risk: 'Overspill drain pinched in flange', group: 'quarter', icon: 'local_gas_station', color: 'emerald' },
-    { id: 'lamps', name: 'Rear Combination Lamps', count: 4, risk: 'Missing foam washer under stud', group: 'tailgate', icon: 'light_mode', color: 'yellow' },
-    { id: 'ditch', name: 'Roof Ditch Rails & Mounts', count: 3, risk: 'Expansion sealer crack in weld', group: 'roof', icon: 'dehaze', color: 'slate' },
-    { id: 'core', name: 'Front Core & Hood Latch', count: 2, risk: 'Release cable grommet unseated', group: 'cowl', icon: 'view_sidebar', color: 'amber' },
-    { id: 'exhausters', name: 'Cabin Pressure Exhausters', count: 3, risk: 'Rubber flap sticky or missing', group: 'quarter', icon: 'air', color: 'cyan' },
-    { id: 'evtray', name: 'EV High-Voltage Tray Gasket', count: 2, risk: 'Continuous perimeter bead skip', group: 'underbody', icon: 'bolt', color: 'amber' },
-    { id: 'wiper', name: 'Rear Backlite & Wiper Shaft', count: 2, risk: 'Spindle seal flange deformation', group: 'tailgate', icon: 'aspect_ratio', color: 'indigo' }
-  ];
-
-  // Initialize
+  // Main Initialize
   function init() {
     initTheme();
     loadStoredData();
@@ -58,8 +72,9 @@
     setupVehicleZones();
     setupInteractiveChecklist();
     setupDataSync();
-    setupDetailModal();
+    setupDetailDrawer();
     setupHotspots();
+    setupKeyboardShortcuts();
 
     // Render Initial State
     renderLessons();
@@ -100,7 +115,7 @@
     }
   }
 
-  // Load data from localStorage or default
+  // Load data from localStorage or pre-bundled defaults
   function loadStoredData() {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
@@ -110,7 +125,6 @@
         lessons = window.DEFAULT_LESSONS_DATA;
       }
     } catch (e) {
-      console.warn('Failed to load from storage, using defaults', e);
       lessons = window.DEFAULT_LESSONS_DATA || [];
     }
 
@@ -196,6 +210,9 @@
     el.lessonsCountHeader = document.getElementById('lessons-count-header');
     el.projectFilterSelect = document.getElementById('project-filter-select');
     el.areaFilterSelect = document.getElementById('area-filter-select');
+    el.viewModeCardsBtn = document.getElementById('view-mode-cards-btn');
+    el.viewModeTableBtn = document.getElementById('view-mode-table-btn');
+    el.lessonsTableContainer = document.getElementById('lessons-table-container');
 
     // Vehicle Zones elements
     el.zonePills = document.querySelectorAll('.filter-pill');
@@ -223,19 +240,23 @@
     el.cachedCountBadge = document.getElementById('cached-count-badge');
     el.cachedFileName = document.getElementById('cached-file-name');
 
-    // Detail Modal elements
+    // Detail Drawer elements
     el.detailBackBtn = document.getElementById('detail-back-btn');
     el.detailSlideNum = document.getElementById('detail-slide-num');
     el.detailDocRef = document.getElementById('detail-doc-ref');
     el.detailProjectArea = document.getElementById('detail-project-area');
+    el.detailAuthor = document.getElementById('detail-author');
     el.detailRiskBadge = document.getElementById('detail-risk-badge');
     el.detailTitle = document.getElementById('detail-title');
+    el.detailDiagramContainer = document.getElementById('detail-diagram-container');
     el.detailWrongText = document.getElementById('detail-wrong-text');
     el.detailCountermeasureText = document.getElementById('detail-countermeasure-text');
     el.detailChecklistContainer = document.getElementById('detail-checklist-container');
     el.detailCheckCountText = document.getElementById('detail-check-count-text');
     el.detailSignoffBtn = document.getElementById('detail-signoff-btn');
     el.detailDefectBtn = document.getElementById('detail-defect-btn');
+    el.detailPrintBtn = document.getElementById('detail-print-btn');
+    el.detailCopyRefBtn = document.getElementById('detail-copy-ref-btn');
 
     // Toast
     el.statusToast = document.getElementById('status-toast');
@@ -306,6 +327,26 @@
     }
   }
 
+  function setupKeyboardShortcuts() {
+    window.addEventListener('keydown', e => {
+      // '/' to focus search
+      if (e.key === '/' && document.activeElement !== el.lessonSearch) {
+        e.preventDefault();
+        window.switchView('lessons-browser');
+        el.lessonSearch?.focus();
+      }
+      // 'Escape' to close detail drawer / modal
+      if (e.key === 'Escape') {
+        if (el.viewDetail && !el.viewDetail.classList.contains('hidden')) {
+          el.viewDetail.classList.add('hidden');
+        }
+        if (el.scanModal && !el.scanModal.classList.contains('hidden')) {
+          el.scanModal.classList.add('hidden');
+        }
+      }
+    });
+  }
+
   function updateKPIDashboard() {
     if (el.kpiTotalLessons) el.kpiTotalLessons.textContent = lessons.length;
     if (el.navCountBadge) el.navCountBadge.textContent = lessons.length;
@@ -319,6 +360,190 @@
 
     const highRiskCount = lessons.filter(l => l.risk === 'High Risk').length;
     if (el.kpiHighRisk) el.kpiHighRisk.textContent = highRiskCount;
+  }
+
+  // --- TECHNICAL SVG DIAGRAM GENERATOR (HUMAN DESIGNED CAD SCHEMATICS) ---
+  function getTechnicalDiagramSVG(area, slideNo) {
+    const a = (area || '').toLowerCase();
+
+    // 1. Harness Clips & Fasteners
+    if (a.includes('clip') || a.includes('fastener')) {
+      return `
+        <svg class="w-full h-24 select-none" viewBox="0 0 400 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Background Blueprint Grid -->
+          <rect width="400" height="96" fill="#0f172a" rx="12"></rect>
+          <path d="M 0 24 H 400 M 0 48 H 400 M 0 72 H 400" stroke="#1e293b" stroke-width="1"></path>
+          <path d="M 50 0 V 96 M 150 0 V 96 M 250 0 V 96 M 350 0 V 96" stroke="#1e293b" stroke-width="1"></path>
+          
+          <!-- Sheet Metal Panel -->
+          <rect x="30" y="44" width="340" height="8" rx="1" fill="#64748b"></rect>
+          <!-- Metal Aperture Hole -->
+          <rect x="180" y="44" width="40" height="8" fill="#0f172a"></rect>
+          
+          <!-- EPT Foam Washer (Black/Dark with Compression Marks) -->
+          <rect x="160" y="38" width="80" height="6" rx="2" fill="#10b981" stroke="#34d399" stroke-width="1"></rect>
+          <text x="200" y="34" fill="#34d399" font-family="JetBrains Mono" font-size="8" font-weight="700" text-anchor="middle">1.0mm EPT FOAM RING (≥50% DEFLECTION)</text>
+          
+          <!-- Nylon Clip Body & Retention Barb -->
+          <path d="M 175 16 H 225 V 38 H 215 V 74 L 200 82 L 185 74 V 38 H 175 Z" fill="#0284c7" stroke="#38bdf8" stroke-width="1.5"></path>
+          <path d="M 185 52 L 170 60 L 185 64 Z" fill="#38bdf8"></path>
+          <path d="M 215 52 L 230 60 L 215 64 Z" fill="#38bdf8"></path>
+          
+          <!-- Dimension Arrows -->
+          <path d="M 155 38 V 44" stroke="#a7f3d0" stroke-width="1"></path>
+          <text x="75" y="24" fill="#94a3b8" font-family="JetBrains Mono" font-size="8" font-weight="600">SHEET METAL INNER</text>
+          <text x="325" y="78" fill="#38bdf8" font-family="JetBrains Mono" font-size="8" font-weight="700">DUAL BARB LOCK</text>
+        </svg>
+      `;
+    }
+
+    // 2. Door Sealing Screen & Butyl Path
+    if (a.includes('sealing screen') || a.includes('butyl')) {
+      return `
+        <svg class="w-full h-24 select-none" viewBox="0 0 400 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="400" height="96" fill="#0f172a" rx="12"></rect>
+          <path d="M 0 24 H 400 M 0 48 H 400 M 0 72 H 400" stroke="#1e293b" stroke-width="1"></path>
+          
+          <!-- Door Inner Steel Profile -->
+          <path d="M 20 70 L 100 70 L 140 40 L 380 40" stroke="#64748b" stroke-width="5" stroke-linecap="round"></path>
+          
+          <!-- Continuous Polyurethane Butyl Bead -->
+          <circle cx="160" cy="40" r="7" fill="#10b981" stroke="#34d399" stroke-width="1.5"></circle>
+          
+          <!-- PE Sealing Screen Layer (Translucent Blue) -->
+          <path d="M 20 66 L 98 66 L 138 34 L 380 34" stroke="#0284c7" stroke-width="2" stroke-dasharray="6 3"></path>
+          
+          <!-- Clip Position Hole with Dimension Arrow -->
+          <circle cx="280" cy="40" r="4" fill="#38bdf8"></circle>
+          <line x1="160" y1="20" x2="280" y2="20" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="2 2"></line>
+          <line x1="160" y1="16" x2="160" y2="24" stroke="#f59e0b" stroke-width="1.5"></line>
+          <line x1="280" y1="16" x2="280" y2="24" stroke="#f59e0b" stroke-width="1.5"></line>
+          <text x="220" y="14" fill="#fbbf24" font-family="JetBrains Mono" font-size="8.5" font-weight="700" text-anchor="middle">OFFSET ≥ 70 mm (KOREN THEME)</text>
+          
+          <text x="60" y="86" fill="#94a3b8" font-family="JetBrains Mono" font-size="8" font-weight="600">DOOR INNER HEM</text>
+          <text x="310" y="60" fill="#38bdf8" font-family="JetBrains Mono" font-size="8" font-weight="600">HARNESS CLIP LOCATOR</text>
+        </svg>
+      `;
+    }
+
+    // 3. Floor Pan, E-Coat Holes & Body Plugs
+    if (a.includes('floor') || a.includes('underbody') || a.includes('holes') || a.includes('plugs') || a.includes('grommets')) {
+      return `
+        <svg class="w-full h-24 select-none" viewBox="0 0 400 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="400" height="96" fill="#0f172a" rx="12"></rect>
+          <path d="M 0 32 H 400 M 0 64 H 400" stroke="#1e293b" stroke-width="1"></path>
+          
+          <!-- Stamped Floor Recess -->
+          <path d="M 30 40 H 140 L 155 58 H 245 L 260 40 H 370" stroke="#64748b" stroke-width="4" fill="none"></path>
+          
+          <!-- EPDM Rubber Flush Plug -->
+          <path d="M 145 54 H 255 V 60 C 255 64 240 68 200 68 C 160 68 145 64 145 60 Z" fill="#10b981" stroke="#34d399" stroke-width="1.5"></path>
+          <ellipse cx="200" cy="54" rx="48" ry="4" fill="#059669"></ellipse>
+          
+          <!-- Splash Vector Arrows (Blocked) -->
+          <path d="M 200 88 V 74 M 180 86 L 190 74 M 220 86 L 210 74" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="2 2"></path>
+          
+          <text x="200" y="24" fill="#34d399" font-family="JetBrains Mono" font-size="8.5" font-weight="700" text-anchor="middle">360° EPDM LIP FLUSH CONTACT (ZERO SPLASH)</text>
+          <text x="80" y="32" fill="#94a3b8" font-family="JetBrains Mono" font-size="8" font-weight="600">STAMPED FLOOR PAN</text>
+          <text x="200" y="80" fill="#f87171" font-family="JetBrains Mono" font-size="7.5" font-weight="600" text-anchor="middle">ROAD SPLASH BARRIER</text>
+        </svg>
+      `;
+    }
+
+    // 4. Cowl, Firewall & HVAC
+    if (a.includes('cowl') || a.includes('hvac')) {
+      return `
+        <svg class="w-full h-24 select-none" viewBox="0 0 400 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="400" height="96" fill="#0f172a" rx="12"></rect>
+          <path d="M 0 32 H 400 M 0 64 H 400" stroke="#1e293b" stroke-width="1"></path>
+          
+          <!-- Water Box Chamber -->
+          <path d="M 40 30 H 130 V 70 H 260 V 45 H 360" stroke="#64748b" stroke-width="4" fill="none"></path>
+          
+          <!-- Stopper Plate Rib (Height >= 37mm) -->
+          <rect x="254" y="20" width="8" height="42" fill="#10b981" stroke="#34d399" stroke-width="1"></rect>
+          <line x1="268" y1="20" x2="268" y2="62" stroke="#fbbf24" stroke-width="1.5"></line>
+          <line x1="264" y1="20" x2="272" y2="20" stroke="#fbbf24" stroke-width="1.5"></line>
+          <line x1="264" y1="62" x2="272" y2="62" stroke="#fbbf24" stroke-width="1.5"></line>
+          <text x="325" y="44" fill="#fbbf24" font-family="JetBrains Mono" font-size="8" font-weight="700">HEIGHT ≥ 37mm</text>
+          
+          <!-- Polyurethane Butyl Bead Path -->
+          <circle cx="125" cy="70" r="6" fill="#0284c7" stroke="#38bdf8" stroke-width="1"></circle>
+          
+          <text x="90" y="22" fill="#94a3b8" font-family="JetBrains Mono" font-size="8" font-weight="600">HVAC AIR INTAKE</text>
+          <text x="140" y="86" fill="#38bdf8" font-family="JetBrains Mono" font-size="8" font-weight="700">CONTINUOUS ROBOT BUTYL</text>
+        </svg>
+      `;
+    }
+
+    // 5. Body Welt, Weatherstrip & Glass Runner
+    if (a.includes('welt') || a.includes('weatherstrip') || a.includes('glass')) {
+      return `
+        <svg class="w-full h-24 select-none" viewBox="0 0 400 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="400" height="96" fill="#0f172a" rx="12"></rect>
+          <path d="M 0 32 H 400 M 0 64 H 400" stroke="#1e293b" stroke-width="1"></path>
+          
+          <!-- Door Sash Metal Flange -->
+          <path d="M 40 48 H 150 V 20 H 158 V 80 H 150 V 56 H 40" fill="#64748b"></path>
+          
+          <!-- EPDM Bulb Profile (Hollow Sealing Bulb) -->
+          <ellipse cx="230" cy="50" rx="28" ry="24" fill="#1e293b" stroke="#10b981" stroke-width="3"></ellipse>
+          
+          <!-- Aero Lip with Zero-Flock Barrier -->
+          <path d="M 158 35 Q 185 30 202 50" stroke="#34d399" stroke-width="3" fill="none"></path>
+          
+          <!-- Door Closing Contact Vector -->
+          <path d="M 290 50 L 265 50" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)"></path>
+          
+          <text x="230" y="20" fill="#34d399" font-family="JetBrains Mono" font-size="8" font-weight="700" text-anchor="middle">NO FLOCK ON AERO LIP (CAPILLARY ARREST)</text>
+          <text x="95" y="42" fill="#94a3b8" font-family="JetBrains Mono" font-size="8" font-weight="600">DOOR SASH</text>
+          <text x="325" y="54" fill="#38bdf8" font-family="JetBrains Mono" font-size="8" font-weight="700">COMPRESSION FIT</text>
+        </svg>
+      `;
+    }
+
+    // 6. Lamps & Lighting
+    if (a.includes('lamp')) {
+      return `
+        <svg class="w-full h-24 select-none" viewBox="0 0 400 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="400" height="96" fill="#0f172a" rx="12"></rect>
+          <path d="M 0 32 H 400 M 0 64 H 400" stroke="#1e293b" stroke-width="1"></path>
+          
+          <!-- Lamp Housing Body -->
+          <path d="M 40 30 H 160 L 200 68 H 360" stroke="#38bdf8" stroke-width="3" fill="none"></path>
+          
+          <!-- Continuous Hot-Melt Adhesive Bead (1.5mm) -->
+          <path d="M 160 30 H 260" stroke="#10b981" stroke-width="5" stroke-linecap="round"></path>
+          
+          <!-- Sheet Metal Aperture Flange -->
+          <path d="M 150 40 H 270" stroke="#64748b" stroke-width="4"></path>
+          
+          <text x="210" y="20" fill="#34d399" font-family="JetBrains Mono" font-size="8.5" font-weight="700" text-anchor="middle">GLUE BEAD ≥ 1.5mm (AIR INTERLINK 4–6 BAR)</text>
+          <text x="80" y="50" fill="#38bdf8" font-family="JetBrains Mono" font-size="8" font-weight="600">LAMP LENS HOUSING</text>
+          <text x="320" y="80" fill="#94a3b8" font-family="JetBrains Mono" font-size="8" font-weight="600">BODY PANEL MATING</text>
+        </svg>
+      `;
+    }
+
+    // Default High-Precision Industrial CAD Cross-Section
+    return `
+      <svg class="w-full h-24 select-none" viewBox="0 0 400 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="400" height="96" fill="#0f172a" rx="12"></rect>
+        <path d="M 0 24 H 400 M 0 48 H 400 M 0 72 H 400" stroke="#1e293b" stroke-width="1"></path>
+        <path d="M 80 0 V 96 M 200 0 V 96 M 320 0 V 96" stroke="#1e293b" stroke-width="1"></path>
+        
+        <!-- Sheet Metal Joint Lap -->
+        <rect x="40" y="38" width="180" height="6" fill="#64748b"></rect>
+        <rect x="180" y="44" width="180" height="6" fill="#475569"></rect>
+        
+        <!-- Extruded Body Sealant Joint -->
+        <ellipse cx="180" cy="44" rx="18" ry="9" fill="#10b981" stroke="#34d399" stroke-width="1.5"></ellipse>
+        
+        <text x="200" y="24" fill="#34d399" font-family="JetBrains Mono" font-size="8.5" font-weight="700" text-anchor="middle">VALIDATED SEAL BARRIER · 360° CONTINUITY</text>
+        <text x="100" y="62" fill="#94a3b8" font-family="JetBrains Mono" font-size="8" font-weight="600">BIW OUTER</text>
+        <text x="300" y="62" fill="#94a3b8" font-family="JetBrains Mono" font-size="8" font-weight="600">BIW INNER REINFORCEMENT</text>
+      </svg>
+    `;
   }
 
   // --- 1. LESSONS BROWSER ---
@@ -359,6 +584,23 @@
       });
     }
 
+    // View Switcher: Cards vs Table
+    if (el.viewModeCardsBtn && el.viewModeTableBtn) {
+      el.viewModeCardsBtn.addEventListener('click', () => {
+        activeSubView = 'cards';
+        localStorage.setItem(VIEW_MODE_KEY, 'cards');
+        updateViewModeButtons();
+        renderLessons();
+      });
+      el.viewModeTableBtn.addEventListener('click', () => {
+        activeSubView = 'table';
+        localStorage.setItem(VIEW_MODE_KEY, 'table');
+        updateViewModeButtons();
+        renderLessons();
+      });
+      updateViewModeButtons();
+    }
+
     el.filterChips.forEach(chip => {
       chip.addEventListener('click', () => {
         el.filterChips.forEach(c => {
@@ -378,13 +620,29 @@
     populateDropdowns();
   }
 
+  function updateViewModeButtons() {
+    if (!el.viewModeCardsBtn || !el.viewModeTableBtn) return;
+    if (activeSubView === 'cards') {
+      el.viewModeCardsBtn.className = 'p-1.5 rounded-lg bg-white dark:bg-slate-700 text-sky-600 dark:text-sky-300 shadow-xs';
+      el.viewModeTableBtn.className = 'p-1.5 rounded-lg text-slate-500 hover:text-slate-800 dark:hover:text-white';
+      el.lessonsContainer?.classList.remove('hidden');
+      el.lessonsTableContainer?.classList.add('hidden');
+    } else {
+      el.viewModeCardsBtn.className = 'p-1.5 rounded-lg text-slate-500 hover:text-slate-800 dark:hover:text-white';
+      el.viewModeTableBtn.className = 'p-1.5 rounded-lg bg-white dark:bg-slate-700 text-sky-600 dark:text-sky-300 shadow-xs';
+      el.lessonsContainer?.classList.add('hidden');
+      el.lessonsTableContainer?.classList.remove('hidden');
+    }
+  }
+
   function populateDropdowns() {
     if (el.projectFilterSelect) {
       const projects = Array.from(new Set(lessons.map(l => l.project))).filter(Boolean).sort();
-      el.projectFilterSelect.innerHTML = '<option value="all">All Projects (' + lessons.length + ')</option>';
+      el.projectFilterSelect.innerHTML = '<option value="all">All Vehicle Programs (' + lessons.length + ')</option>';
       projects.forEach(p => {
         const count = lessons.filter(l => l.project === p).length;
-        el.projectFilterSelect.innerHTML += `<option value="${p}">${p} (${count})</option>`;
+        const displayName = PROJECT_NAMES[p] || p;
+        el.projectFilterSelect.innerHTML += `<option value="${p}">${displayName} (${count})</option>`;
       });
 
       el.projectFilterSelect.addEventListener('change', e => {
@@ -395,7 +653,7 @@
 
     if (el.areaFilterSelect) {
       const areas = Array.from(new Set(lessons.map(l => l.area))).filter(Boolean).sort();
-      el.areaFilterSelect.innerHTML = '<option value="all">All 17 Areas</option>';
+      el.areaFilterSelect.innerHTML = '<option value="all">All 17 Vehicle Areas</option>';
       areas.forEach(a => {
         const count = lessons.filter(l => l.area === a).length;
         el.areaFilterSelect.innerHTML += `<option value="${a}">${a} (${count})</option>`;
@@ -460,13 +718,21 @@
   }
 
   function renderLessons() {
-    if (!el.lessonsContainer) return;
-
     const filtered = getMatchingLessons();
 
     if (el.lessonsCountHeader) {
       el.lessonsCountHeader.textContent = `Showing ${filtered.length} of ${lessons.length} Standard Lessons`;
     }
+
+    if (activeSubView === 'table') {
+      renderTable(filtered);
+    } else {
+      renderCards(filtered);
+    }
+  }
+
+  function renderCards(filtered) {
+    if (!el.lessonsContainer) return;
 
     if (filtered.length === 0) {
       el.lessonsContainer.innerHTML = `
@@ -503,20 +769,15 @@
       const isMedRisk = item.risk === 'Med Risk';
 
       const riskPill = isHighRisk
-        ? 'bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-400 border border-rose-200 dark:border-rose-900'
+        ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-400 border border-rose-200 dark:border-rose-900/60'
         : isMedRisk
-        ? 'bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-400 border border-amber-200 dark:border-amber-900'
-        : 'bg-sky-100 text-sky-700 dark:bg-sky-950/60 dark:text-sky-400 border border-sky-200 dark:border-sky-900';
+        ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-400 border border-amber-200 dark:border-amber-900/60'
+        : 'bg-sky-50 text-sky-700 dark:bg-sky-950/60 dark:text-sky-400 border border-sky-200 dark:border-sky-900/60';
 
       const dotColor = isHighRisk ? 'bg-rose-600' : isMedRisk ? 'bg-amber-500' : 'bg-sky-500';
 
-      // Pick an illustrative technical schematic badge
-      const techBadge = item.area.includes('Door') ? 'CAD Door Section'
-        : item.area.includes('Cowl') ? '90mm Robot Path'
-        : item.area.includes('Floor') ? 'Station 4 Camera'
-        : item.area.includes('Glass') ? 'Aero Lip Section'
-        : item.area.includes('Lamp') ? 'Seal Bead Contour'
-        : 'Process Inspection';
+      // SVG CAD Schematic
+      const svgDiagram = getTechnicalDiagramSVG(item.area, item.slideNo);
 
       return `
         <article class="bg-white dark:bg-[#0f172a] rounded-3xl p-5 border border-slate-200/90 dark:border-slate-800 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between gap-4 group" data-slide="${item.slideNo}">
@@ -526,9 +787,9 @@
             <div class="flex items-center justify-between gap-2">
               <div class="flex items-center gap-1.5 flex-wrap">
                 <span class="font-mono text-xs font-bold text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-950/60 border border-sky-200 dark:border-sky-800 px-2.5 py-1 rounded-lg">
-                  #${item.slideNo}
+                  Slide #${item.slideNo}
                 </span>
-                <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md">
+                <span class="text-[11px] font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md">
                   ${escapeHTML(item.area)}
                 </span>
                 <span class="text-[10px] font-mono font-bold text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 px-1.5 py-0.5 rounded">
@@ -546,39 +807,30 @@
               ${escapeHTML(item.concern)}
             </h3>
 
-            <!-- Technical Engineering CAD Banner -->
-            <div class="w-full h-24 rounded-2xl overflow-hidden bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 dark:from-slate-950 dark:to-slate-900 border border-slate-800 relative flex items-center justify-between px-4">
-              <div class="flex items-center gap-2.5 text-white">
-                <span class="material-symbols-outlined text-[28px] text-sky-400">precision_manufacturing</span>
-                <div class="flex flex-col">
-                  <span class="font-mono text-xs font-bold text-sky-300 tracking-wider uppercase">${escapeHTML(item.docRef || ('DOC-SLIDE-' + item.slideNo))}</span>
-                  <span class="text-[11px] text-slate-300">${escapeHTML(item.area)} • 360° Seal Spec</span>
-                </div>
-              </div>
-              <span class="text-[10px] font-mono font-medium bg-black/60 text-white border border-white/10 px-2 py-0.5 rounded">
-                ${techBadge}
-              </span>
+            <!-- Human-Designed Technical CAD Schematic -->
+            <div class="rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-[#0f172a]">
+              ${svgDiagram}
             </div>
 
-            <!-- 3 Structured Color Blocks -->
+            <!-- 3 Editorial Colored Blocks -->
             <div class="space-y-2 text-xs">
-              <!-- Wrong -->
+              <!-- Problem -->
               <div class="flex items-start gap-2.5 p-2.5 rounded-xl bg-rose-50/70 dark:bg-rose-950/30 border border-rose-200/80 dark:border-rose-900/40 text-slate-800 dark:text-slate-200">
-                <span class="w-2 h-2 rounded-full bg-rose-500 shrink-0 mt-1"></span>
+                <span class="material-symbols-outlined text-rose-600 text-[16px] shrink-0 mt-0.5">error</span>
                 <p class="leading-relaxed">
-                  <strong class="text-rose-700 dark:text-rose-400 font-bold uppercase tracking-wider">Wrong:</strong> ${escapeHTML(wrongText)}
+                  <strong class="text-rose-700 dark:text-rose-400 font-bold uppercase tracking-wider">Issue:</strong> ${escapeHTML(wrongText)}
                 </p>
               </div>
               <!-- Fix -->
               <div class="flex items-start gap-2.5 p-2.5 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-900/40 text-slate-800 dark:text-slate-200">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0 mt-1"></span>
+                <span class="material-symbols-outlined text-emerald-600 text-[16px] shrink-0 mt-0.5">verified</span>
                 <p class="leading-relaxed">
                   <strong class="text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-wider">Fix:</strong> ${escapeHTML(fixText)}
                 </p>
               </div>
-              <!-- Check -->
+              <!-- Line Checkpoint -->
               <div class="flex items-start gap-2.5 p-2.5 rounded-xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-900/40 text-slate-800 dark:text-slate-200">
-                <span class="w-2 h-2 rounded-full bg-amber-500 shrink-0 mt-1"></span>
+                <span class="material-symbols-outlined text-amber-600 text-[16px] shrink-0 mt-0.5">checklist</span>
                 <p class="leading-relaxed">
                   <strong class="text-amber-800 dark:text-amber-400 font-bold uppercase tracking-wider">Check:</strong> ${escapeHTML(checkText)}
                 </p>
@@ -587,9 +839,9 @@
           </div>
 
           <!-- Bottom Action Buttons -->
-          <div class="pt-2 flex items-center gap-2 border-t border-slate-100 dark:border-slate-800">
+          <div class="pt-2 flex items-center justify-between gap-2 border-t border-slate-100 dark:border-slate-800">
             <button
-              class="quick-verify-btn h-11 px-4 rounded-xl border text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 shrink-0 ${
+              class="quick-verify-btn h-10 px-3.5 rounded-xl border text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 shrink-0 ${
                 isVerified
                   ? 'bg-emerald-600 text-white border-transparent'
                   : 'border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
@@ -604,11 +856,11 @@
             </button>
 
             <button
-              class="open-detail-btn flex-1 h-11 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-sky-600 dark:hover:bg-sky-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs transition-all active:scale-95"
+              class="open-detail-btn flex-1 h-10 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-sky-600 dark:hover:bg-sky-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs transition-all active:scale-95"
               data-slide="${item.slideNo}"
               type="button"
             >
-              <span>Lesson Standard</span>
+              <span>View Sheet</span>
               <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
             </button>
           </div>
@@ -617,8 +869,71 @@
       `;
     }).join('');
 
-    // Attach Click Events
-    el.lessonsContainer.querySelectorAll('.quick-verify-btn').forEach(btn => {
+    attachCardEventListeners();
+  }
+
+  function renderTable(filtered) {
+    if (!el.lessonsTableContainer) return;
+
+    if (filtered.length === 0) {
+      el.lessonsTableContainer.innerHTML = `
+        <div class="p-8 text-center text-slate-400">No lessons matched your filter.</div>
+      `;
+      return;
+    }
+
+    el.lessonsTableContainer.innerHTML = `
+      <div class="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0f172a] shadow-xs">
+        <table class="w-full text-left border-collapse text-xs">
+          <thead>
+            <tr class="bg-slate-50 dark:bg-slate-850 border-b border-slate-200 dark:border-slate-800 text-slate-500 font-bold uppercase tracking-wider text-[11px]">
+              <th class="py-3 px-3.5">Slide</th>
+              <th class="py-3 px-3.5">Program</th>
+              <th class="py-3 px-3.5">Category</th>
+              <th class="py-3 px-3.5">Concern / Issue</th>
+              <th class="py-3 px-3.5">Countermeasure</th>
+              <th class="py-3 px-3.5">Verification</th>
+              <th class="py-3 px-3.5 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+            ${filtered.map(item => {
+              const isVerified = verifiedSlides.has(item.slideNo);
+              return `
+                <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors cursor-pointer row-inspect-trigger" data-slide="${item.slideNo}">
+                  <td class="py-3 px-3.5 font-mono font-bold text-sky-600 dark:text-sky-400">#${item.slideNo}</td>
+                  <td class="py-3 px-3.5 font-semibold text-slate-900 dark:text-white">${escapeHTML(item.project)}</td>
+                  <td class="py-3 px-3.5 text-slate-600 dark:text-slate-300 font-medium">${escapeHTML(item.area)}</td>
+                  <td class="py-3 px-3.5 font-bold text-slate-900 dark:text-white max-w-xs truncate">${escapeHTML(item.concern)}</td>
+                  <td class="py-3 px-3.5 text-slate-600 dark:text-slate-300 max-w-xs truncate">${escapeHTML(item.countermeasures[0] || 'Standard fix applied')}</td>
+                  <td class="py-3 px-3.5">
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                      isVerified
+                        ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-400'
+                        : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
+                    }">
+                      <span class="w-1.5 h-1.5 rounded-full ${isVerified ? 'bg-emerald-500' : 'bg-slate-400'}"></span>
+                      ${isVerified ? 'Verified' : 'Pending'}
+                    </span>
+                  </td>
+                  <td class="py-3 px-3.5 text-right">
+                    <button class="open-detail-btn px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-sky-50 hover:text-sky-600 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-[11px] transition-colors" data-slide="${item.slideNo}" type="button">
+                      Open Sheet
+                    </button>
+                  </td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+
+    attachCardEventListeners();
+  }
+
+  function attachCardEventListeners() {
+    document.querySelectorAll('.quick-verify-btn').forEach(btn => {
       btn.addEventListener('click', e => {
         e.stopPropagation();
         const slideNo = parseInt(btn.getAttribute('data-slide'), 10);
@@ -626,10 +941,10 @@
       });
     });
 
-    el.lessonsContainer.querySelectorAll('.open-detail-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const slideNo = parseInt(btn.getAttribute('data-slide'), 10);
-        openDetailModal(slideNo);
+    document.querySelectorAll('.open-detail-btn, .row-inspect-trigger').forEach(el => {
+      el.addEventListener('click', e => {
+        const slideNo = parseInt(el.getAttribute('data-slide'), 10);
+        openDetailDrawer(slideNo);
       });
     });
   }
@@ -637,18 +952,18 @@
   function toggleVerification(slideNo) {
     if (verifiedSlides.has(slideNo)) {
       verifiedSlides.delete(slideNo);
-      showToast(`Slide #${slideNo} verification removed.`);
+      showToast(`Slide #${slideNo} verification cleared.`);
     } else {
       verifiedSlides.add(slideNo);
-      showToast(`Slide #${slideNo} certified and verified on Line!`);
+      showToast(`Slide #${slideNo} verified on Line!`);
     }
     saveVerifiedSlides();
     renderLessons();
     updateKPIDashboard();
   }
 
-  // --- 2. LESSON DETAIL MODAL ---
-  function setupDetailModal() {
+  // --- 2. LESSON DETAIL SLIDE-OVER DRAWER ---
+  function setupDetailDrawer() {
     if (el.detailSignoffBtn) {
       el.detailSignoffBtn.addEventListener('click', () => {
         if (!currentDetailSlide) return;
@@ -656,7 +971,7 @@
         saveVerifiedSlides();
         updateKPIDashboard();
         renderLessons();
-        showToast(`Slide #${currentDetailSlide.slideNo} signed off & logged to shift report.`);
+        showToast(`Slide #${currentDetailSlide.slideNo} verified and signed off.`);
         if (el.viewDetail) el.viewDetail.classList.add('hidden');
       });
     }
@@ -664,7 +979,7 @@
     if (el.detailDefectBtn) {
       el.detailDefectBtn.addEventListener('click', () => {
         if (!currentDetailSlide) return;
-        const note = prompt('Describe defect observed for Slide #' + currentDetailSlide.slideNo, 'Water intrusion detected during high pressure rain check');
+        const note = prompt('Describe defect observed for Slide #' + currentDetailSlide.slideNo, 'Water intrusion detected during rain check');
         if (note) {
           const newDefect = {
             id: 'DEF-' + Date.now().toString().slice(-4),
@@ -677,14 +992,32 @@
           defectLogs.unshift(newDefect);
           saveDefects();
           updateDefectsList();
-          showToast(`Defect logged for Slide #${currentDetailSlide.slideNo}! Alert sent to Shift QA Lead.`);
+          showToast(`Defect ticket #${newDefect.id} escalated to Shift QA Lead.`);
           if (el.viewDetail) el.viewDetail.classList.add('hidden');
         }
       });
     }
+
+    if (el.detailCopyRefBtn) {
+      el.detailCopyRefBtn.addEventListener('click', () => {
+        if (!currentDetailSlide) return;
+        const ref = currentDetailSlide.docRef || `Slide #${currentDetailSlide.slideNo}`;
+        navigator.clipboard?.writeText(ref).then(() => {
+          showToast(`Copied document reference: ${ref}`);
+        }).catch(() => {
+          showToast(ref);
+        });
+      });
+    }
+
+    if (el.detailPrintBtn) {
+      el.detailPrintBtn.addEventListener('click', () => {
+        window.print();
+      });
+    }
   }
 
-  function openDetailModal(slideNo) {
+  function openDetailDrawer(slideNo) {
     const item = lessons.find(l => l.slideNo === slideNo) || lessons[0];
     if (!item) return;
 
@@ -693,6 +1026,7 @@
     if (el.detailSlideNum) el.detailSlideNum.textContent = `Slide ${item.slideNo} of ${lessons.length}`;
     if (el.detailDocRef) el.detailDocRef.textContent = item.docRef || `RNTBCI/LLR/SLIDE-${item.slideNo}`;
     if (el.detailProjectArea) el.detailProjectArea.textContent = `${item.project} • ${item.area}`;
+    if (el.detailAuthor) el.detailAuthor.textContent = `Prepared by: ${item.preparedBy || 'Damodharan (VQE)'}`;
     if (el.detailTitle) el.detailTitle.textContent = item.concern;
 
     if (el.detailRiskBadge) {
@@ -702,19 +1036,34 @@
         : 'px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-400 border border-amber-200 dark:border-amber-800';
     }
 
-    // Causes
+    // High-resolution SVG Diagram in Drawer
+    if (el.detailDiagramContainer) {
+      el.detailDiagramContainer.innerHTML = getTechnicalDiagramSVG(item.area, item.slideNo);
+    }
+
+    // Causes 1, 2, 3
     const causes = item.rootCauses.length > 0 ? item.rootCauses : ['Direct water ingress path through unsealed sheet metal aperture.'];
     if (el.detailWrongText) {
-      el.detailWrongText.innerHTML = causes.map(c => `• ${escapeHTML(c)}`).join('<br>');
+      el.detailWrongText.innerHTML = causes.map((c, i) => `
+        <div class="flex items-start gap-2">
+          <span class="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0 mt-1.5"></span>
+          <span class="text-slate-800 dark:text-slate-200">${escapeHTML(c)}</span>
+        </div>
+      `).join('');
     }
 
-    // Fix
+    // Countermeasures 1, 2, 3
     const fixes = item.countermeasures.length > 0 ? item.countermeasures : ['Design modification and sealing barrier added.'];
     if (el.detailCountermeasureText) {
-      el.detailCountermeasureText.innerHTML = fixes.map(f => `• ${escapeHTML(f)}`).join('<br>');
+      el.detailCountermeasureText.innerHTML = fixes.map((f, i) => `
+        <div class="flex items-start gap-2">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0 mt-1.5"></span>
+          <span class="text-slate-800 dark:text-slate-200 font-medium">${escapeHTML(f)}</span>
+        </div>
+      `).join('');
     }
 
-    // Checkpoints
+    // Check Points 1, 2, 3, 4
     const checks = item.checkPoints.length > 0 ? item.checkPoints : [
       'Confirm water restriction barrier intact without damage or deformation.',
       'Verify positive engagement and audible snap click during assembly.',
@@ -727,7 +1076,7 @@
         <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 cursor-pointer select-none hover:border-sky-500 transition-colors">
           <input type="checkbox" class="detail-chk w-5 h-5 rounded text-sky-600 focus:ring-sky-500 border-slate-300 dark:border-slate-700">
           <div class="flex flex-col min-w-0">
-            <span class="text-xs font-bold text-slate-900 dark:text-white">Check Point ${i + 1}</span>
+            <span class="text-xs font-bold text-slate-900 dark:text-white">Line Checkpoint ${i + 1}</span>
             <span class="text-xs text-slate-600 dark:text-slate-300">${escapeHTML(chk)}</span>
           </div>
         </label>
@@ -805,7 +1154,7 @@
 
           <div>
             <h3 class="text-base font-extrabold text-slate-900 dark:text-white">${z.name}</h3>
-            <span class="text-xs text-slate-400 font-medium">Digital Check LLR Zone</span>
+            <span class="text-xs text-slate-400 font-medium">${z.station}</span>
           </div>
 
           <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-xs text-slate-700 dark:text-slate-300 flex items-center gap-2">
@@ -814,7 +1163,7 @@
           </div>
         </div>
 
-        <button class="w-full h-11 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-sky-600 dark:hover:bg-sky-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-xs" onclick="openLessonsForZone('${z.name}')" type="button">
+        <button class="w-full h-10 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-sky-600 dark:hover:bg-sky-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-xs" onclick="openLessonsForZone('${z.name}')" type="button">
           <span>Open Lessons (${z.count})</span>
           <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
         </button>
@@ -956,7 +1305,7 @@
     // Complete Station Inspection
     if (el.completeStationBtn) {
       el.completeStationBtn.addEventListener('click', () => {
-        showToast('Station 06 Certified! Vehicle #8XF-90214 cleared for Station 07 Water Booth.');
+        showToast('Station 06 Certified! Vehicle cleared for Station 07 Shower Booth.');
       });
     }
 

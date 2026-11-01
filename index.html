@@ -15,8 +15,8 @@
       }
     }
     ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
+      width: 7px;
+      height: 7px;
     }
     ::-webkit-scrollbar-track {
       background: transparent;
@@ -97,7 +97,7 @@
   <!-- ========================================================================= -->
   <!-- TOP ENTERPRISE NAVIGATION BAR (FULL WIDTH WIDESCREEN) -->
   <!-- ========================================================================= -->
-  <header class="sticky top-0 z-50 w-full bg-white/90 dark:bg-[#0f172a]/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 transition-colors shadow-xs">
+  <header class="sticky top-0 z-40 w-full bg-white/90 dark:bg-[#0f172a]/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 transition-colors shadow-xs">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-16">
         
@@ -254,17 +254,18 @@
             <span class="material-symbols-outlined text-slate-400 text-[22px] pl-3.5 pr-2 pointer-events-none">search</span>
             <input
               id="lesson-search"
-              class="w-full h-11 bg-transparent text-slate-900 dark:text-white placeholder:text-slate-400 text-sm font-medium focus:outline-none pr-16"
+              class="w-full h-11 bg-transparent text-slate-900 dark:text-white placeholder:text-slate-400 text-sm font-medium focus:outline-none pr-20"
               placeholder="Search by keyword, clip, butyl 70mm, plug, grommet, speaker, sealant..."
               spellcheck="false"
               autocomplete="off"
               type="text"
             />
-            <div class="absolute right-1.5 flex items-center gap-1">
+            <div class="absolute right-1.5 flex items-center gap-1.5">
+              <kbd class="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-[10px] font-mono text-slate-400 select-none">/</kbd>
               <button id="clear-search-btn" aria-label="Clear Search Input" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hidden transition-colors" type="button">
                 <span class="material-symbols-outlined text-[18px]">close</span>
               </button>
-              <button id="voice-mic-btn" aria-label="Voice input dictate query" class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-200/60 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600 active:scale-95 transition-all" type="button">
+              <button id="voice-mic-btn" aria-label="Voice input dictate query" class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-200/60 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600 active:scale-95 transition-all" title="Simulate voice dictation" type="button">
                 <span class="material-symbols-outlined text-[18px]">mic</span>
               </button>
             </div>
@@ -281,7 +282,7 @@
           </div>
         </div>
 
-        <!-- Quick Filter Chips & Results Count Strip -->
+        <!-- Quick Filter Chips & View Mode Toggle Strip -->
         <div class="flex items-center justify-between gap-3 flex-wrap pt-1 border-t border-slate-100 dark:border-slate-800/80">
           <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
             <button class="filter-chip active-filter shrink-0 h-8 px-3 rounded-full bg-slate-900 text-white dark:bg-sky-500 dark:text-white text-xs font-bold flex items-center gap-1.5 transition-all" data-filter="all" type="button">
@@ -310,16 +311,33 @@
             </button>
           </div>
 
-          <!-- Matching count text -->
-          <span id="lessons-count-header" class="text-xs font-bold text-slate-500 dark:text-slate-400 font-mono">
-            Showing 76 Standard Lessons
-          </span>
+          <!-- Matching count text & View Mode Toggle (Cards vs Table Matrix) -->
+          <div class="flex items-center gap-3">
+            <span id="lessons-count-header" class="text-xs font-bold text-slate-500 dark:text-slate-400 font-mono">
+              Showing 76 Standard Lessons
+            </span>
+            <div class="flex items-center p-0.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+              <button id="view-mode-cards-btn" class="p-1.5 rounded-lg bg-white dark:bg-slate-700 text-sky-600 dark:text-sky-300 shadow-xs flex items-center gap-1 text-xs font-bold transition-all" title="Visual Cards View" type="button">
+                <span class="material-symbols-outlined text-[16px]">grid_view</span>
+                <span class="hidden sm:inline">Cards</span>
+              </button>
+              <button id="view-mode-table-btn" class="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 dark:hover:text-white flex items-center gap-1 text-xs font-bold transition-all" title="Dense Quality Matrix Table" type="button">
+                <span class="material-symbols-outlined text-[16px]">table_rows</span>
+                <span class="hidden sm:inline">Matrix</span>
+              </button>
+            </div>
+          </div>
         </div>
 
       </div>
 
       <!-- Multi-Column Industrial Cards Grid -->
       <div id="lessons-cards-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <!-- Injected dynamically by app.js -->
+      </div>
+
+      <!-- Dense Quality Matrix Table Container -->
+      <div id="lessons-table-container" class="hidden">
         <!-- Injected dynamically by app.js -->
       </div>
 
@@ -793,7 +811,7 @@
 
         <!-- Sync Actions -->
         <div class="pt-4 flex flex-col sm:flex-row items-center gap-3">
-          <button id="syncNowBtn" class="w-full sm:flex-1 h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-md transition-all active:scale-95" type="button">
+          <button id="sync-now-btn" class="w-full sm:flex-1 h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-md transition-all active:scale-95" type="button">
             <span class="material-symbols-outlined text-[20px]">sync</span> Force Sync to Local Storage
           </button>
           <button id="reset-cache-btn" class="w-full sm:w-auto h-12 px-5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-rose-50 hover:text-rose-600 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 font-bold text-xs transition-colors" type="button">
@@ -808,42 +826,71 @@
   </div>
 
   <!-- ========================================================================= -->
-  <!-- LESSON DETAIL MODAL / SLIDE-OVER -->
+  <!-- LESSON DETAIL SLIDE-OVER DRAWER (view-lesson-detail) -->
   <!-- ========================================================================= -->
-  <div id="view-lesson-detail" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-md overflow-y-auto p-4 sm:p-6 flex items-center justify-center">
-    <div class="bg-white dark:bg-[#0f172a] rounded-3xl w-full max-w-2xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden my-auto flex flex-col">
+  <div id="view-lesson-detail" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm overflow-hidden flex justify-end">
+    <!-- Click backdrop to close -->
+    <div class="fixed inset-0 transition-opacity" onclick="if (event.target === this) document.getElementById('view-lesson-detail').classList.add('hidden');"></div>
+
+    <!-- Slide-over Drawer Panel -->
+    <div class="relative w-full max-w-2xl bg-white dark:bg-[#0f172a] h-full shadow-2xl border-l border-slate-200 dark:border-slate-800 flex flex-col z-10 transition-transform duration-300">
       
-      <!-- Modal Header -->
-      <div class="px-6 py-4 bg-slate-50 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
-        <div class="flex items-center gap-2.5">
+      <!-- Drawer Header -->
+      <div class="px-6 py-4 bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-2">
           <span id="detail-slide-num" class="font-mono text-xs font-bold text-sky-700 bg-sky-50 dark:bg-sky-950/60 dark:text-sky-300 border border-sky-200 dark:border-sky-800 px-2.5 py-1 rounded-lg">
             Slide 14 of 76
           </span>
           <span id="detail-doc-ref" class="font-mono text-xs text-slate-500 dark:text-slate-400">
             RNTBCI/2021/PY1B/VQE/KH/WL/14
           </span>
+          <button id="detail-copy-ref-btn" class="p-1 rounded text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors" title="Copy Document Reference" type="button">
+            <span class="material-symbols-outlined text-[16px]">content_copy</span>
+          </button>
         </div>
-        <button id="detail-back-btn" class="w-8 h-8 rounded-lg bg-slate-200/60 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700 flex items-center justify-center transition-colors" type="button">
-          <span class="material-symbols-outlined text-[18px]">close</span>
-        </button>
+        <div class="flex items-center gap-1.5">
+          <button id="detail-print-btn" class="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors" title="Print Quality Sheet" type="button">
+            <span class="material-symbols-outlined text-[18px]">print</span>
+          </button>
+          <button id="detail-back-btn" class="w-8 h-8 rounded-lg bg-slate-200/60 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700 flex items-center justify-center transition-colors" title="Close Drawer (Esc)" type="button">
+            <span class="material-symbols-outlined text-[18px]">close</span>
+          </button>
+        </div>
       </div>
 
-      <!-- Modal Body -->
-      <div class="p-6 space-y-5 overflow-y-auto max-h-[75vh]">
+      <!-- Drawer Body (Scrollable) -->
+      <div class="p-6 space-y-5 overflow-y-auto flex-1">
         
-        <!-- Severity & Title -->
+        <!-- Meta & Title -->
         <div>
-          <div class="flex items-center gap-2 mb-1.5">
+          <div class="flex items-center gap-2 mb-1.5 flex-wrap">
             <span id="detail-risk-badge" class="px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-400 border border-rose-200 dark:border-rose-800">
               High Risk
             </span>
-            <span id="detail-project-area" class="text-xs font-bold text-slate-500 dark:text-slate-400">
+            <span id="detail-project-area" class="text-xs font-bold text-slate-600 dark:text-slate-300">
               PY1B • Door Assembly
+            </span>
+            <span class="text-slate-300 dark:text-slate-700">•</span>
+            <span id="detail-author" class="text-xs font-mono text-slate-500 dark:text-slate-400">
+              Prepared by: Damodharan (VQE)
             </span>
           </div>
           <h2 id="detail-title" class="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white leading-snug">
             Door Inner Harness Clip Water Seal Leak
           </h2>
+        </div>
+
+        <!-- Technical CAD Schematic -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between text-[11px] font-mono text-slate-400">
+            <span class="flex items-center gap-1 font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400">
+              <span class="material-symbols-outlined text-[14px]">architecture</span> CAD Cross-Section Schematic
+            </span>
+            <span>Scale 1:1 Engineering Vector</span>
+          </div>
+          <div id="detail-diagram-container" class="rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-[#0f172a] p-1">
+            <!-- Dynamic SVG injected here -->
+          </div>
         </div>
 
         <!-- 3 Structured Cards -->
@@ -855,7 +902,7 @@
               <span class="material-symbols-outlined text-[18px]">error</span>
               <span>1. What Went Wrong (Root Cause)</span>
             </div>
-            <div id="detail-wrong-text" class="text-xs sm:text-sm text-slate-800 dark:text-slate-200 font-medium leading-relaxed pl-6">
+            <div id="detail-wrong-text" class="text-xs sm:text-sm text-slate-800 dark:text-slate-200 font-medium leading-relaxed space-y-1.5">
               Missing foam gasket causes direct water intrusion past outer seal into cabin dry cavity.
             </div>
           </div>
@@ -866,7 +913,7 @@
               <span class="material-symbols-outlined text-[18px]">verified</span>
               <span>2. How It Was Fixed (Countermeasure)</span>
             </div>
-            <div id="detail-countermeasure-text" class="text-xs sm:text-sm text-slate-800 dark:text-slate-200 font-medium leading-relaxed pl-6">
+            <div id="detail-countermeasure-text" class="text-xs sm:text-sm text-slate-800 dark:text-slate-200 font-medium leading-relaxed space-y-1.5">
               Pre-fitted 1mm EPT closed-cell foam ring with dual-barb positive lock.
             </div>
           </div>
@@ -888,8 +935,8 @@
         </div>
       </div>
 
-      <!-- Modal Sticky Action Footer -->
-      <div class="px-6 py-4 bg-slate-50 dark:bg-slate-900/80 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3">
+      <!-- Drawer Sticky Action Footer -->
+      <div class="px-6 py-4 bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 shrink-0">
         <button id="detail-defect-btn" class="h-11 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 transition-all active:scale-95 shadow-xs" type="button">
           <span class="material-symbols-outlined text-[18px]">flag</span> Flag Defect
         </button>
@@ -904,7 +951,7 @@
   <!-- ========================================================================= -->
   <!-- MOBILE BOTTOM NAVIGATION (SUB-768PX ONLY) -->
   <!-- ========================================================================= -->
-  <nav data-shell-nav class="md:hidden fixed bottom-0 w-full z-40 bg-white/95 dark:bg-[#0f172a]/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 shadow-lg">
+  <nav data-shell-nav class="md:hidden fixed bottom-0 w-full z-30 bg-white/95 dark:bg-[#0f172a]/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 shadow-lg">
     <div class="flex justify-around items-center h-16 px-2">
       <button data-path="lessons-browser" class="mobile-nav-btn active flex flex-col items-center justify-center flex-1 py-1 text-sky-600 dark:text-sky-400 font-bold" type="button">
         <span class="material-symbols-outlined text-[22px]">menu_book</span>
