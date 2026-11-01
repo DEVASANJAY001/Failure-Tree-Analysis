@@ -1,0 +1,23 @@
+{
+  "name": "leakguard-water-leak-portal",
+  "version": "1.0.0",
+  "description": "Industrial Water Leak Knowledge Portal & Shopfloor Line Inspection System based on 76 LLR Lessons",
+  "main": "index.html",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "node test/portal.test.js"
+  },
+  "keywords": [
+    "water-leak",
+    "automotive-quality",
+    "vqe",
+    "llr",
+    "manufacturing",
+    "shopfloor",
+    "inspection"
+  ],
+  "author": "Quality Reliability Engineering Team",
+  "license": "ISC"
+}
+
