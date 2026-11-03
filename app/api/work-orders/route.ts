@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { WorkOrder } from '@/lib/types';
 import { FTA_SCENARIOS } from '@/lib/fta-scenarios';
 
+export const dynamic = 'force-dynamic';
+
 let inMemoryWorkOrders: WorkOrder[] = FTA_SCENARIOS.map(s => s.defaultWorkOrder);
 
 export async function GET() {

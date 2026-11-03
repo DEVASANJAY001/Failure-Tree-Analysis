@@ -2,7 +2,6 @@
   "name": "leakguard-water-leak-portal",
   "version": "1.0.0",
   "description": "Industrial Water Leak Knowledge Portal & Shopfloor Line Inspection System based on 76 LLR Lessons",
-  "main": "index.html",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

@@ -3,6 +3,8 @@ import fs from 'fs';
 import path from 'path';
 import { Lesson } from '@/lib/types';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: NextRequest) {
   try {
     const jsonPath = path.join(process.cwd(), 'lessons-data.json');
