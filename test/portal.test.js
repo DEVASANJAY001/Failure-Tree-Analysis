@@ -97,11 +97,22 @@ const htmlContent = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'u
 assert(htmlContent.includes('lessons-data.js'), 'index.html must include lessons-data.js');
 assert(htmlContent.includes('app.js'), 'index.html must include app.js');
 assert(htmlContent.includes('LeakGuard LLR'), 'index.html must have LeakGuard branding');
+assert(htmlContent.includes('view-fta-agent'), 'index.html must have view-fta-agent primary view');
 assert(htmlContent.includes('view-lessons-browser'), 'index.html must have lessons-browser view');
 assert(htmlContent.includes('view-vehicle-zones'), 'index.html must have vehicle-zones view');
 assert(htmlContent.includes('view-interactive-checklist'), 'index.html must have interactive-checklist view');
 assert(htmlContent.includes('view-data-sync'), 'index.html must have data-sync view');
 assert(htmlContent.includes('view-lesson-detail'), 'index.html must have lesson-detail view');
-console.log('✅ 7. Frontend structure verified: all 5 Stitch views present in index.html.');
+assert(htmlContent.includes('workOrderModal'), 'index.html must have workOrderModal');
+console.log('✅ 7. Frontend structure verified: FTA Agent, Work Order Modal, and all 5 Views present in index.html.');
 
-console.log('\n🎉 ALL 7 TEST SUITES PASSED SUCCESSFULLY!\n');
+// 8. Verify FTA Root Cause Agent Engine in app.js
+const appContent = fs.readFileSync(path.join(__dirname, '..', 'app.js'), 'utf8');
+assert(appContent.includes('FTA_SCENARIOS'), 'app.js must include FTA_SCENARIOS dataset');
+assert(appContent.includes('setupFTAAgent'), 'app.js must include setupFTAAgent');
+assert(appContent.includes('setupWorkOrderModal'), 'app.js must include setupWorkOrderModal');
+assert(appContent.includes('floor-pan-flooding'), 'app.js must include floor-pan-flooding case scenario');
+assert(appContent.includes('door-cavity-speaker'), 'app.js must include door-cavity-speaker case scenario');
+console.log('✅ 8. FTA Failure Tree Analysis Engine and Work Order dispatch system verified in app.js.');
+
+console.log('\n🎉 ALL 8 TEST SUITES PASSED SUCCESSFULLY!\n');

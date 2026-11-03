@@ -1,44 +1,81 @@
-# 🛡️ LeakGuard LLR — Water Leak Knowledge & Line Inspection Portal
+# 🛡️ LeakGuard LLR — FTA Root Cause Agent & Diagnostic Portal
 
 [![Project Status: Active](https://img.shields.io/badge/Status-Production%20Ready-emerald.svg)](#)
+[![FTA Engine: Active](https://img.shields.io/badge/Engine-Failure%20Tree%20Analysis%20(FTA)-orange.svg)](#)
 [![Dataset: 76 LLR Lessons](https://img.shields.io/badge/Dataset-76%20Standard%20Lessons-blue.svg)](#)
 [![Vehicle Zones: 17 Areas](https://img.shields.io/badge/Coverage-17%20Vehicle%20Zones-indigo.svg)](#)
 [![Vehicle Projects: 7 Models](https://img.shields.io/badge/Programs-7%20Vehicle%20Projects-amber.svg)](#)
 [![Offline First: LocalStorage/IndexedDB](https://img.shields.io/badge/Storage-Offline%20Active-emerald.svg)](#)
-[![Design System: Stitch Pro](https://img.shields.io/badge/UI%2FUX-Stitch%20Industrial%20Pro-0284c7.svg)](https://stitch.withgoogle.com/projects/12142003827231996459)
 
-> **Turning 76 slides of plant water-leak lessons into an instant-search portal, interactive vehicle schematic, and touch-friendly shopfloor verification system.**
+> **Automotive Water Leak FTA (Failure Tree Analysis) & Root Cause Agent for Service Technicians, Techliners, and Quality Analysts. Replaces hours of manual correlation with instant visual fault tree isolation, diagnostic reasoning chains, and 1-click Work Order generation.**
 
 ---
 
 ## 📌 Executive Summary
 
 ### The Idea in One Line
-Plant and vehicle engineering design teams hold years of water-leak lessons learned (LLR) in a 76-slide digital check review. **LeakGuard LLR** turns that static slide deck into a searchable, interactive portal so anyone can find a leak issue, understand why it happened, see how it was engineered out, and execute verified check points on the line.
+When a vehicle enters a service dealership or rolls off the assembly line with water ingress (wet passenger carpet, dripping headliner, flooded spare tyre well, or speaker seepage), **LeakGuard LLR FTA Agent** guides service technicians, techliners, and reliability analysts through a structured **Failure Tree Analysis (FTA)** to debunk false leads, pinpoint the isolated **ROOT CAUSE**, and dispatch actionable engineering work orders in minutes.
 
-### The Problem It Solves
-Engineering knowledge was previously trapped in static slide decks and scattered spreadsheets:
-- **Slide decks cannot be queried quickly** during CAD reviews or filtered by specific vehicle zone.
-- **They cannot be used as an interactive line checklist** during manufacturing takt times.
-- **Identical issues repeat across vehicle programs** (e.g., missing foam on wire harness clips, unsealed e-coat drain holes, incorrect butyl path offsets <70mm). Teams repeat past mistakes because they cannot access historical lessons quickly.
+### Traditional vs. AI-Powered FTA Troubleshooting
+
+```
+TRADITIONAL TROUBLESHOOTING:
+  Customer Complaint  -->  Static Slide Decks  -->  Manual Tear-down  -->  Guesswork  -->  [HOURS OF DOWNTIME]
+
+cPACKET / UptimeAI-STYLE FTA ROOT CAUSE AGENT:
+  Diagnostic Query    -->  Visual Fault Tree   -->  Debunked Hypotheses --> Isolated ROOT CAUSE --> Work Order Notification [MINUTES]
+```
 
 ---
 
 ## ✨ Key Features & Capabilities
 
 ```
-+--------------------------------------------------------------------------------------------------+
-|                                    LEAKGUARD LLR PORTAL                                          |
-+---------------------+-----------------------+------------------------+---------------------------+
-|  1. Lessons Hub     |  2. 17 Vehicle Zones  |  3. Line Checklist     |  4. Excel / CSV Sync      |
-|  - Real-time search |  - Interactive CAD    |  - Glove-tap buttons   |  - Drag & drop .xlsx/.csv |
-|  - Multi-tag filter |    blueprint hot-spots|  - Live Pass/Fail Takt |  - Auto column mapping    |
-|  - 3-step cards     |  - 17 Zone cards      |  - VIN barcode scanner |  - Instant CSV export     |
-|  - Quick Verify (OK)|  - Instant deep-links |  - Defect logger dock  |  - Reset to 76 defaults   |
-+---------------------+-----------------------+------------------------+---------------------------+
++---------------------------------------------------------------------------------------------------------+
+|                                  LEAKGUARD LLR FTA DIAGNOSTIC AGENT                                      |
++--------------------------+----------------------------+-------------------------+-----------------------+
+|  1. Interactive FTA Tree |  2. Diagnostic Chain (5-St)|  3. Actionable Fixes    |  4. Work Order Modal  |
+|  - Bezier curve branches |  - Step-by-step reasoning  |  - 1. Execute fix       |  - Priority, Due Date |
+|  - Root Symptom Node     |  - Techline verification   |  - 2. Verify with test  |  - Assignee & Est Hrs |
+|  - ROOT CAUSE (Orange)   |  - Historical correlation  |  - 3. Update SOP / POS  |  - Instant dispatch   |
+|  - Debunked & Verified   |  - 96% confidence score    |  - Linked LLR slide refs|  - Track active WOs   |
++--------------------------+----------------------------+-------------------------+-----------------------+
 ```
 
-### 1. 📖 Three-Step Structured Lesson Representation
+### 1. 🌲 Interactive Failure Tree Analysis (FTA) Graph
+- **Visual Branching Tree:** Features a high-contrast Top Event root node connected by smooth SVG cubic bezier curves to intermediate hypotheses.
+- **Color-Coded Status Badges (Matching UptimeAI Style):**
+  - 🟠 **ROOT CAUSE:** Prominently highlighted in vivid orange with detailed root mechanism and LLR slide reference.
+  - ⚫ **Debunked:** Slate badges documenting the exact physical test that ruled out the hypothesis (e.g. *Debunked: Stopper weir measured 42mm*, *Debunked: 360° e-coat plug seated*).
+  - 🟢 **Verified Contributory Factor:** Documents verified secondary bypasses (e.g. *Verified: Clip #3 foam missing*).
+- **Interactive State Toggling:** Technicians can click any branch to mark as `Root Cause`, `Debunked`, or `Verified`, instantly recalculating the diagnostic chain.
+
+### 2. ⚡ Step-by-Step AI Diagnostic Reasoning Chain
+- **5-Step Forensic Timeline:**
+  1. *Ingress Localization:* Static shower test and moisture mapping.
+  2. *Hypothesis Clearance (Debunked):* Elimination of adjacent chambers.
+  3. *Root Cause Isolation:* Metric comparison against mandatory engineering rules (e.g., *actual 35mm vs mandatory 70mm butyl clearance from LLR Slide #10*).
+  4. *Secondary Bypass Verification:* Corroboration of missing foam gaskets or unsealed apertures.
+  5. *Validation & Retest:* Confirmed water arrest after countermeasure application.
+
+### 3. 📋 Create Work Order Notification System
+- Directly matching industrial CMMS/EAM notification modals:
+  - **Description:** Pre-filled with actionable technical recommendations.
+  - **Priority:** `Critical (Line Stop)`, `High`, `Medium`, `Low`.
+  - **Due Date:** Calendar date selection.
+  - **Assigned To:** Assign to Techline Specialist (`Nikit`), VQE Lead (`Sree Vishnu`), Quality Analyst (`Damodharan`), or Service Tech (`J. Ramirez`).
+  - **Estimated Hours:** Planned maintenance duration.
+  - **Confirm / Dispatch:** Saves to persistent storage, tracks status (`Draft` → `In Progress` → `Completed`), and triggers real-time toast notification.
+
+### 4. 📚 5 Pre-Built Automotive Diagnostic Case Scenarios
+- **Case #LK-01: Front Passenger Floor Wet Carpet** — Root Cause: Door sealing screen butyl gap (<35mm vs 70mm spec, Slide #10).
+- **Case #LK-02: Door Inner Pocket Ingress & Speaker Drip** — Root Cause: Pop-up knob clip open snap relief feature (Slide #2).
+- **Case #LK-03: Headliner Soak & A-Pillar Drip** — Root Cause: Body welt joining cut positioned at upper A-pillar radius (Slide #22).
+- **Case #LK-04: Cowl Water Box Air Intake Seepage** — Root Cause: Cowl water box stopper weir height < 37mm in Z direction (Slide #51).
+- **Case #LK-05: Spare Wheel Well Water Pooling** — Root Cause: Rear combination lamp retaining stud missing EPDM foam washer (Slide #12).
+- **Dynamic FTA Synthesis:** Enter *any* customer complaint or keyword into the search bar to synthesize a dynamic fault tree from the 76 LLR dataset!
+
+### 5. 📖 Three-Step Structured Lesson Representation
 Every slide is normalized into three actionable, color-coded blocks:
 - 🔴 **What Went Wrong (Root Cause):** Ingress path analysis, aperture dimensions, water pressure, and assembly gaps.
 - 🟢 **How It Was Fixed (Countermeasure):** ECN engineering fix, closed-cell foam addition, continuous sealant paths, and pilot-flange bolts.

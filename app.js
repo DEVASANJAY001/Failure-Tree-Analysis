@@ -1,7 +1,7 @@
 /**
- * LeakGuard LLR — Water Leak Knowledge & Shopfloor Portal
- * Human-Crafted Automotive Quality Engineering System
- * Digital Check Review (LLR) Engine for Renault-Nissan RNTBCI Standards
+ * LeakGuard LLR — Failure Tree Analysis (FTA) & Root Cause Agent
+ * AI-Assisted Water Leak Diagnostic System for Service Technicians, Techliners & Quality Analysts
+ * Powered by Renault-Nissan Digital Check Review (LLR) Knowledge Base
  */
 
 (function () {
@@ -12,6 +12,7 @@
   const VERIFIED_KEY = 'LEAKGUARD_VERIFIED_SLIDES_V3';
   const CHECKLIST_KEY = 'LEAKGUARD_STATION_CHECKS_V3';
   const DEFECTS_KEY = 'LEAKGUARD_DEFECT_LOGS_V3';
+  const WORK_ORDERS_KEY = 'LEAKGUARD_WORK_ORDERS_V1';
   const THEME_KEY = 'LEAKGUARD_THEME_MODE_V3';
   const VIEW_MODE_KEY = 'LEAKGUARD_VIEW_MODE'; // 'cards' | 'table'
 
@@ -20,12 +21,18 @@
   let currentFilter = 'all';
   let currentProjectFilter = 'all';
   let currentSearchQuery = '';
-  let activeTab = 'lessons-browser';
+  let activeTab = 'fta-agent'; // DEFAULT LANDING VIEW
   let activeSubView = localStorage.getItem(VIEW_MODE_KEY) || 'cards';
   let currentDetailSlide = null;
   let verifiedSlides = new Set();
   let stationChecks = {};
   let defectLogs = [];
+  let workOrders = [];
+
+  // FTA Agent State
+  let activeScenarioId = 'floor-pan-flooding';
+  let activeFtaTab = 'recommendations'; // 'recommendations' | 'workorders' | 'documents' | 'system'
+  let customFtaQuery = '';
 
   // Project Code Mapping with full commercial vehicle names
   const PROJECT_NAMES = {
@@ -59,6 +66,369 @@
     { id: 'wiper', name: 'Rear Backlite & Wiper Shaft', count: 2, risk: 'Spindle seal flange deformation', group: 'tailgate', icon: 'aspect_ratio', station: 'Station 08 · Wiper Line' }
   ];
 
+  // Pre-configured Automotive Leak FTA Scenarios
+  const FTA_SCENARIOS = [
+    {
+      id: 'floor-pan-flooding',
+      title: 'Front Passenger Floor Pan Wetness & Carpet Saturation',
+      symptom: 'Floor Wetness + High Ingress Flow',
+      vehicle: 'Kiger (PY1B) / Magnite (HBC)',
+      confidence: 96,
+      rootCauseSummary: 'Sealing screen service hole butyl adhesive gap (<35mm vs 70mm spec) combined with unsealed wire harness clip penetration into inner door dry cavity.',
+      primarySlide: 10,
+      evidenceSlides: [10, 14, 22, 35],
+      branches: [
+        {
+          id: 'b1',
+          name: 'Cowl drain weir overflow (<37mm height)',
+          slideNo: 51,
+          status: 'debunked',
+          badgeText: 'Debunked: Stopper measured 42mm',
+          detail: 'Measured cowl water box stopper height at 42mm (exceeds min 37mm threshold). Zero moisture behind firewall sound deadener.'
+        },
+        {
+          id: 'b2',
+          name: 'Floor pan oval e-coat drainage plug unseated',
+          slideNo: 35,
+          status: 'debunked',
+          badgeText: 'Debunked: 360° flush fit confirmed',
+          detail: 'Underbody inspection confirmed all 6 under-carpet drainage plugs sealed with intact PVC wax boundary.'
+        },
+        {
+          id: 'b3',
+          name: 'Door sealing screen butyl line offset <70mm',
+          slideNo: 10,
+          status: 'root_cause',
+          badgeText: 'ROOT CAUSE: Butyl offset 35mm (Slide #10)',
+          detail: 'Butyl bead measured 35mm from harness clip aperture (spec requires min 70mm). Water pooled in outer cavity flows past peeled adhesive.'
+        },
+        {
+          id: 'b4',
+          name: 'HVAC evaporator condensate drain tube kinked',
+          slideNo: 50,
+          status: 'debunked',
+          badgeText: 'Debunked: Condensate flow clear',
+          detail: 'HVAC cabin core drainage tube clear and draining freely into engine compartment; zero reservoir backup.'
+        },
+        {
+          id: 'b5',
+          name: 'Door harness retention clip missing EPT foam gasket',
+          slideNo: 14,
+          status: 'verified',
+          badgeText: 'Verified: Clip #3 bare (Slide #14)',
+          detail: 'Lower door harness attachment clip #3 missing 1mm EPT closed-cell foam ring, enabling capillary seep into cabin cavity.'
+        },
+        {
+          id: 'b6',
+          name: 'Front seat mounting stud bolt sealer skip',
+          slideNo: 35,
+          status: 'checked',
+          badgeText: 'Checked: 360° sealer bead ok',
+          detail: 'Checked with borescope: 360° continuous paint sealer bead present on stud weld flange.'
+        }
+      ],
+      chain: [
+        { step: 1, title: 'Rain Booth Static Test', desc: 'Simulated 10-minute shower test (2.5 bar, 20 L/min). Water accumulation localized to lower right A-pillar sill and passenger carpet.' },
+        { step: 2, title: 'Underbody & Cowl Exclusion', desc: 'Borescope inspection of cowl water box and underbody e-coat plugs: Debunked (zero water traces found in firewall cavity).' },
+        { step: 3, title: 'Door Trim Disassembly & Butyl Audit', desc: 'Removed passenger front door trim card. Measured distance between sealing screen butyl bead and lower harness clip aperture: actual 35mm vs mandatory 70mm minimum standard (LLR Slide #10).' },
+        { step: 4, title: 'Harness Clip Foam Inspection', desc: 'Extracted harness clip #3 from door inner panel: clip is raw nylon with missing 1mm EPT closed-cell foam gasket (LLR Slide #14), creating direct entry hole.' },
+        { step: 5, title: 'Containment & Retest Validation', desc: 'Re-routed butyl bead to maintain 75mm clearance and installed pre-gasketed clip (Part #24220-4EA0A). 20-minute re-spray test confirms 100% dry.' }
+      ],
+      recommendations: [
+        { type: 'Execute', text: 'Re-route door sealing screen butyl adhesive line maintaining strictly ≥ 70mm clearance from inner trim fastener apertures (NDS Rule 4.2 / LLR Slide #10).' },
+        { type: 'Verify', text: 'Replace bare harness clip #3 with pre-fitted 1mm EPT closed-cell foam ring clip (Part #24220-4EA0A / LLR Slide #14).' },
+        { type: 'Update', text: 'Update Trim & Final Station 06 SOP and Quality Control Plan to enforce 360° tactile verification of butyl continuity.' }
+      ],
+      defaultWorkOrder: {
+        id: 'WO-890214',
+        status: 'Draft',
+        description: 'Re-route sealing screen butyl to ≥ 70mm & install 1mm EPT foam clip',
+        equipment: 'Kiger (PY1B) - VIN 8XF-90214',
+        plant: 'Plant 1 · Service Bay 4',
+        priority: 'High',
+        assignedTo: 'Nikit (Techline Specialist)',
+        dueDate: 'Today',
+        estimatedHours: '1.5'
+      }
+    },
+    {
+      id: 'door-cavity-speaker',
+      title: 'Water Dripping from Door Inner Pocket & Speaker Grille',
+      symptom: 'Door Cavity Wetness + Speaker Seepage',
+      vehicle: 'Magnite / Kiger (HBC)',
+      confidence: 94,
+      rootCauseSummary: 'Rear door pop-up knob clip open snap relief feature combined with speaker mounting gasket compression loss under dynamic spray.',
+      primarySlide: 2,
+      evidenceSlides: [2, 57, 3, 5],
+      branches: [
+        {
+          id: 'b1',
+          name: 'Outer waist weatherstrip lip deformation',
+          slideNo: 5,
+          status: 'debunked',
+          badgeText: 'Debunked: Lip contact >150N',
+          detail: 'Tested glass runner and outer waist seal retention force: 165N (exceeds 150N minimum specification).'
+        },
+        {
+          id: 'b2',
+          name: 'Pop-up knob clip open snap relief slot',
+          slideNo: 2,
+          status: 'root_cause',
+          badgeText: 'ROOT CAUSE: Open snap relief (Slide #2)',
+          detail: 'Water entry restriction structure not available in pop-up knob clip; water directly penetrates through snap relief hole into dry trim.'
+        },
+        {
+          id: 'b3',
+          name: 'Speaker mounting collar foam gasket missing',
+          slideNo: 57,
+          status: 'verified',
+          badgeText: 'Verified: Foam omitted (Slide #57)',
+          detail: 'Speaker basket mounted metal-to-metal without pre-cut closed-cell foam gasket ring, permitting water seep past rivet holes.'
+        },
+        {
+          id: 'b4',
+          name: 'Door bottom hem drain slot blockage',
+          slideNo: 6,
+          status: 'debunked',
+          badgeText: 'Debunked: 3 weep slots clear',
+          detail: 'Checked door bottom hem flange: all three gravity weep slots unobstructed with correct downward pitch.'
+        },
+        {
+          id: 'b5',
+          name: 'Rear door glass runner flock material capillary feed',
+          slideNo: 5,
+          status: 'checked',
+          badgeText: 'Checked: Aero lip clean',
+          detail: 'Flock material verified removed on aero lip as per LLR Slide #5 revision.'
+        }
+      ],
+      chain: [
+        { step: 1, title: 'Complaint Verification', desc: 'Customer reported water dripping on passenger speaker grille after car wash.' },
+        { step: 2, title: 'Waist Seal & Drain Check', desc: 'Inspected outer glass waist seal retention: Debunked (165N normal load). Bottom drain slots free of wax obstruction.' },
+        { step: 3, title: 'Pop-up Knob Clip Inspection', desc: 'Borescope inspection through glass opening revealed water entering directly through the snap relief slot of the pop-up knob clip (LLR Slide #2).' },
+        { step: 4, title: 'Speaker Basket Gasket Audit', desc: 'Removed front speaker: speaker ring installed without 1.5mm closed-cell EPDM foam gasket, allowing runoff into cabin.' },
+        { step: 5, title: 'Fix & Retest', desc: 'Fitted closed-type pop-up knob clip with continuous restriction wall and replaced speaker gasket. Water leak eliminated.' }
+      ],
+      recommendations: [
+        { type: 'Execute', text: 'Replace open snap pop-up knob clips with modified closed-wall clip design (LLR Slide #2).' },
+        { type: 'Verify', text: 'Ensure pre-cut 1.5mm EPDM foam gasket fitted on door speaker housing before rivet fastening.' },
+        { type: 'Update', text: 'Update Techline bulletin with Part #80960-xxxx closed clip part number cross-reference.' }
+      ],
+      defaultWorkOrder: {
+        id: 'WO-890215',
+        status: 'Draft',
+        description: 'Replace pop-up knob clip with closed-wall variant & renew speaker foam seal',
+        equipment: 'Magnite (HBC) - VIN 8XF-90215',
+        plant: 'Plant 1 · Service Bay 2',
+        priority: 'Medium',
+        assignedTo: 'Damodharan (Analyst)',
+        dueDate: 'Tomorrow',
+        estimatedHours: '1.0'
+      }
+    },
+    {
+      id: 'headliner-a-pillar',
+      title: 'Headliner Dampness & A-Pillar / Windshield Header Drip',
+      symptom: 'A-Pillar Water Drip + Header Soak',
+      vehicle: 'Triber (RBC) / Kiger (PY1B)',
+      confidence: 95,
+      rootCauseSummary: 'Roof ditch expander sealer skip at windshield header corner combined with body welt joining cut at A-pillar upper radius.',
+      primarySlide: 4,
+      evidenceSlides: [4, 6, 22, 55],
+      branches: [
+        {
+          id: 'b1',
+          name: 'Windshield polyurethane adhesive bead void',
+          slideNo: 48,
+          status: 'debunked',
+          badgeText: 'Debunked: PU bead continuous',
+          detail: 'Tested windshield bond line with ultrasonic air probe: continuous adhesive bead, zero air transmission.'
+        },
+        {
+          id: 'b2',
+          name: 'Body welt joining cut placed at upper A-pillar',
+          slideNo: 22,
+          status: 'root_cause',
+          badgeText: 'ROOT CAUSE: Cut at pillar (Slide #22)',
+          detail: 'Body welt joining seam positioned at upper A-pillar radius instead of bottom sill, allowing gravity water track into headliner.'
+        },
+        {
+          id: 'b3',
+          name: 'Roof ditch molding weld seam sealer skip',
+          slideNo: 55,
+          status: 'verified',
+          badgeText: 'Verified: Sealer void in ditch',
+          detail: 'Laser braze / resistance spot weld seam under ditch molding has 4mm sealer skip, enabling rainwater migration.'
+        },
+        {
+          id: 'b4',
+          name: 'Sunroof cassette drain tube disconnect',
+          slideNo: 47,
+          status: 'debunked',
+          badgeText: 'Debunked: Tube clamped tight',
+          detail: 'Front left sunroof drain tube securely engaged with spring clamp to A-pillar pass-through spout.'
+        }
+      ],
+      chain: [
+        { step: 1, title: 'Localizing Ingress Point', desc: 'Moisture detected along driver upper A-pillar trim and sun visor mounting point.' },
+        { step: 2, title: 'Windshield PU Bead Inspection', desc: 'Ultrasonic inspection of fixed windshield perimeter: Debunked (100% bonded).' },
+        { step: 3, title: 'Door Body Welt Joint Analysis', desc: 'Body welt seam was cut and joined at upper A-pillar curved profile. Water flowing down ditch enters through the joint cut (LLR Slide #22).' },
+        { step: 4, title: 'Roof Ditch Joint Inspection', desc: 'Removed roof ditch molding: found pinhole void in structural mastic seam.' },
+        { step: 5, title: 'Verification', desc: 'Applied single-piece continuous body welt joined strictly at bottom sill and resealed roof ditch weld.' }
+      ],
+      recommendations: [
+        { type: 'Execute', text: 'Reposition body welt joining seam strictly to bottom sill (100mm from B-pillar) per NDS Std.' },
+        { type: 'Verify', text: 'Reseal roof ditch joint with automotive 1K MS polymer seam sealer.' },
+        { type: 'Update', text: 'Mandate single continuous body welt extrusion in upcoming model year design review.' }
+      ],
+      defaultWorkOrder: {
+        id: 'WO-890216',
+        status: 'Draft',
+        description: 'Reinstall body welt with bottom sill joint & reseal roof ditch void',
+        equipment: 'Triber (RBC) - VIN 8XF-90216',
+        plant: 'Plant 1 · Service Bay 1',
+        priority: 'High',
+        assignedTo: 'Sree Vishnu (VQE)',
+        dueDate: 'Today',
+        estimatedHours: '2.0'
+      }
+    },
+    {
+      id: 'cowl-bulkhead',
+      title: 'Cowl Water Box Ingress into Cabin Air Intake & Blower Cavity',
+      symptom: 'Blower Motor Wet + Musty Smell',
+      vehicle: 'Duster (PB1D) / Captur (HHA)',
+      confidence: 93,
+      rootCauseSummary: 'Cowl water box stopper weir height insufficient (<37mm in Z direction), causing cascade over HVAC intake during car wash.',
+      primarySlide: 51,
+      evidenceSlides: [51, 50, 56, 45],
+      branches: [
+        {
+          id: 'b1',
+          name: 'Cowl water box stopper height < 37mm in Z axis',
+          slideNo: 51,
+          status: 'root_cause',
+          badgeText: 'ROOT CAUSE: Height 24mm (Slide #51)',
+          detail: 'Measured stopper weir height: 24mm (fails NDS standard min 37mm). Dynamic car wash cascade spills directly over weir into HVAC fresh air duct.'
+        },
+        {
+          id: 'b2',
+          name: 'Wiper pivot spindle rubber grommet pinched',
+          slideNo: 56,
+          status: 'debunked',
+          badgeText: 'Debunked: Grommet fully seated',
+          detail: 'Wiper spindle grommet seated flat with 360° flange overlap; zero bypass water.'
+        },
+        {
+          id: 'b3',
+          name: 'Hood release cable bulkhead pass-through unsealed',
+          slideNo: 56,
+          status: 'debunked',
+          badgeText: 'Debunked: E-coat plug intact',
+          detail: 'Hood release cable rubber cone seated flush with positive audible latch click.'
+        },
+        {
+          id: 'b4',
+          name: 'Cowl chamber leaves / debris accumulation',
+          slideNo: 50,
+          status: 'verified',
+          badgeText: 'Verified: Left drain clogged',
+          detail: 'Left-side duckbill drain valve partially restricted by organic debris, aggravating water pooling.'
+        }
+      ],
+      chain: [
+        { step: 1, title: 'Customer Symptom Check', desc: 'Blower fan vibrating with sloshing water noise and musty odor after drive through thunderstorm.' },
+        { step: 2, title: 'Bulkhead Pass-Through Check', desc: 'Inspected hood release cable and harness grommets: Debunked (both tightly seated).' },
+        { step: 3, title: 'Cowl Box Weir Gauge Audit', desc: 'Gauge measurement of cowl water box intake weir: 24mm Z-height (fails mandatory 37mm threshold from LLR Slide #51).' },
+        { step: 4, title: 'Drain Valve Cleanout', desc: 'Found duckbill rubber drain restricted, causing water head to rise 30mm during heavy volume.' },
+        { step: 5, title: 'Countermeasure Extension', desc: 'Installed 37mm weir riser collar and cleared duckbill drain valve. High-pressure jet test passed.' }
+      ],
+      recommendations: [
+        { type: 'Execute', text: 'Fit 37mm cowl water stopper extension collar and ensure continuous overlap in X direction (LLR Slide #51).' },
+        { type: 'Verify', text: 'Flush cowl drain duckbill valves with 5L water; confirm instantaneous drainage.' },
+        { type: 'Update', text: 'Incorporate cowl stopper Z-height gauge check into Pre-Delivery Inspection (PDI) checklist.' }
+      ],
+      defaultWorkOrder: {
+        id: 'WO-890217',
+        status: 'Draft',
+        description: 'Fit 37mm cowl stopper extension collar & flush duckbill valves',
+        equipment: 'Duster (PB1D) - VIN 8XF-90217',
+        plant: 'Plant 1 · Service Bay 3',
+        priority: 'High',
+        assignedTo: 'Nikit (Techline Specialist)',
+        dueDate: 'In 2 days',
+        estimatedHours: '1.5'
+      }
+    },
+    {
+      id: 'boot-luggage-well',
+      title: 'Spare Wheel Well Water Pooling & Rear Floor Dampness',
+      symptom: 'Luggage Well Flooded + Damp Mat',
+      vehicle: 'Kwid (XBA) / Triber (RBC)',
+      confidence: 97,
+      rootCauseSummary: 'Rear combination lamp mounting stud missing closed-cell foam washer combined with cabin pressure exhauster flap seal skip.',
+      primarySlide: 1,
+      evidenceSlides: [1, 12, 4, 57],
+      branches: [
+        {
+          id: 'b1',
+          name: 'Tailgate body welt air vent hole facing outward',
+          slideNo: 4,
+          status: 'debunked',
+          badgeText: 'Debunked: Vent faces inward',
+          detail: 'Air vent hole verified facing towards inner cabin side per LLR Slide #4 countermeasure.'
+        },
+        {
+          id: 'b2',
+          name: 'Rear combination lamp stud missing foam washer',
+          slideNo: 12,
+          status: 'root_cause',
+          badgeText: 'ROOT CAUSE: Missing washer (Slide #12)',
+          detail: 'Upper right combination lamp retaining stud installed without closed-cell foam washer; runoff from rear quarter flows directly into quarter panel cavity and spare tyre tub.'
+        },
+        {
+          id: 'b3',
+          name: 'Cabin pressure exhauster vent rubber flap stuck',
+          slideNo: 57,
+          status: 'verified',
+          badgeText: 'Verified: Flap pinched open',
+          detail: 'Exhauster vent rubber flap distorted by bumper wire harness routing, staying partially open.'
+        },
+        {
+          id: 'b4',
+          name: 'Rear backlite glass polyurethane void',
+          slideNo: 6,
+          status: 'debunked',
+          badgeText: 'Debunked: No glass void',
+          detail: 'No water passage across fixed glass perimeter seal during focused jet spray.'
+        }
+      ],
+      chain: [
+        { step: 1, title: 'Water Pool Identification', desc: 'Customer found 1.5 cm of standing water in spare wheel tub after driving in rain.' },
+        { step: 2, title: 'Tailgate Perimeter Test', desc: 'Tested tailgate welt and backlite glass: Debunked (no ingress across upper hatch).' },
+        { step: 3, title: 'Rear Quarter Teardown', desc: 'Removed right rear lamp assembly: upper stud hole lacked the mandatory closed-cell foam washer (LLR Slide #12).' },
+        { step: 4, title: 'Exhauster Vent Check', desc: 'Inspected cabin air exhauster behind rear bumper: lower flap caught on harness clip.' },
+        { step: 5, title: 'Resolution', desc: 'Fitted OEM EPDM stud washer, rerouted bumper harness, and dried cabin carpet.' }
+      ],
+      recommendations: [
+        { type: 'Execute', text: 'Fit closed-cell EPDM foam washers under all rear lamp mounting studs (LLR Slide #12).' },
+        { type: 'Verify', text: 'Verify cabin pressure exhauster flaps close gravitationally without harness interference.' },
+        { type: 'Update', text: 'Add Poka-Yoke fixture at lamp supplier to prevent stud insertion without foam washer.' }
+      ],
+      defaultWorkOrder: {
+        id: 'WO-890218',
+        status: 'Draft',
+        description: 'Fit rear lamp stud EPDM washers & free cabin exhauster flap',
+        equipment: 'Kwid (XBA) - VIN 8XF-90218',
+        plant: 'Plant 1 · Service Bay 5',
+        priority: 'Medium',
+        assignedTo: 'Damodharan (Analyst)',
+        dueDate: 'Today',
+        estimatedHours: '1.0'
+      }
+    }
+  ];
+
   // DOM Elements cache
   const el = {};
 
@@ -68,6 +438,8 @@
     loadStoredData();
     cacheDOMElements();
     setupNavigation();
+    setupFTAAgent();
+    setupWorkOrderModal();
     setupLessonsBrowser();
     setupVehicleZones();
     setupInteractiveChecklist();
@@ -77,6 +449,7 @@
     setupKeyboardShortcuts();
 
     // Render Initial State
+    renderFTAAgent();
     renderLessons();
     renderZones();
     updateChecklistUI();
@@ -121,7 +494,7 @@
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         lessons = JSON.parse(stored);
-      } else if (window.DEFAULT_LESSONS_DATA && window.DEFAULT_LESSONS_DATA.length > 0) {
+      } else if (window.DEFAULT_LESSONS_DATA) {
         lessons = window.DEFAULT_LESSONS_DATA;
       }
     } catch (e) {
@@ -141,8 +514,6 @@
       const storedChecks = localStorage.getItem(CHECKLIST_KEY);
       if (storedChecks) {
         stationChecks = JSON.parse(storedChecks);
-      } else {
-        stationChecks = { 14: 'pass', 22: 'none', 35: 'none', 51: 'none' };
       }
     } catch (e) {
       stationChecks = {};
@@ -155,6 +526,18 @@
       }
     } catch (e) {
       defectLogs = [];
+    }
+
+    try {
+      const storedWorkOrders = localStorage.getItem(WORK_ORDERS_KEY);
+      if (storedWorkOrders) {
+        workOrders = JSON.parse(storedWorkOrders);
+      } else {
+        workOrders = FTA_SCENARIOS.map(s => s.defaultWorkOrder);
+        saveWorkOrders();
+      }
+    } catch (e) {
+      workOrders = FTA_SCENARIOS.map(s => s.defaultWorkOrder);
     }
   }
 
@@ -182,8 +565,15 @@
     } catch (e) {}
   }
 
+  function saveWorkOrders() {
+    try {
+      localStorage.setItem(WORK_ORDERS_KEY, JSON.stringify(workOrders));
+    } catch (e) {}
+  }
+
   function cacheDOMElements() {
     // Views
+    el.viewFta = document.getElementById('view-fta-agent');
     el.viewLessons = document.getElementById('view-lessons-browser');
     el.viewZones = document.getElementById('view-vehicle-zones');
     el.viewChecklist = document.getElementById('view-interactive-checklist');
@@ -194,6 +584,31 @@
     el.navTabBtns = document.querySelectorAll('.nav-tab-btn');
     el.mobileNavBtns = document.querySelectorAll('.mobile-nav-btn');
     el.navCountBadge = document.getElementById('nav-count-badge');
+
+    // FTA Agent Elements
+    el.ftaScenarioSelect = document.getElementById('fta-scenario-select');
+    el.ftaQueryInput = document.getElementById('fta-query-input');
+    el.ftaRunBtn = document.getElementById('fta-run-btn');
+    el.ftaCreateWoBtn = document.getElementById('fta-create-wo-btn');
+    el.ftaTreeContainer = document.getElementById('fta-tree-canvas');
+    el.ftaChainContainer = document.getElementById('fta-chain-container');
+    el.ftaIncidentTitle = document.getElementById('fta-incident-title');
+    el.ftaConfidenceBadge = document.getElementById('fta-confidence-badge');
+    el.ftaIncidentDesc = document.getElementById('fta-incident-desc');
+    el.ftaRightTabs = document.querySelectorAll('.fta-tab-btn');
+    el.ftaTabContent = document.getElementById('fta-tab-content');
+    el.ftaPrintBtn = document.getElementById('fta-print-btn');
+
+    // Work Order Modal
+    el.workOrderModal = document.getElementById('workOrderModal');
+    el.closeWoModal = document.getElementById('closeWoModal');
+    el.cancelWoBtn = document.getElementById('cancelWoBtn');
+    el.confirmWoBtn = document.getElementById('confirmWoBtn');
+    el.woDesc = document.getElementById('wo-desc');
+    el.woPriority = document.getElementById('wo-priority');
+    el.woDueDate = document.getElementById('wo-due-date');
+    el.woAssignee = document.getElementById('wo-assignee');
+    el.woHours = document.getElementById('wo-hours');
 
     // KPI Elements
     el.kpiTotalLessons = document.getElementById('kpi-total-lessons');
@@ -234,7 +649,7 @@
     el.fileInput = document.getElementById('file-input');
     el.browseBtn = document.getElementById('browse-btn');
     el.dropZone = document.getElementById('drop-zone');
-    el.syncNowBtn = document.getElementById('sync-now-btn');
+    el.syncNowBtn = document.getElementById('sync-now-btn') || document.getElementById('syncNowBtn');
     el.resetCacheBtn = document.getElementById('reset-cache-btn');
     el.downloadTemplateBtn = document.getElementById('download-template-btn');
     el.cachedCountBadge = document.getElementById('cached-count-badge');
@@ -269,31 +684,37 @@
     window.switchView = function (viewName) {
       activeTab = viewName;
 
-      // Close modal if open
+      // Close modals
       if (el.viewDetail) el.viewDetail.classList.add('hidden');
+      if (el.workOrderModal) el.workOrderModal.classList.add('hidden');
 
       // Hide all views
-      [el.viewLessons, el.viewZones, el.viewChecklist, el.viewSync].forEach(v => {
+      [el.viewFta, el.viewLessons, el.viewZones, el.viewChecklist, el.viewSync].forEach(v => {
         if (v) v.classList.add('hidden');
       });
 
       // Show target view
-      if (viewName === 'lessons-browser' && el.viewLessons) el.viewLessons.classList.remove('hidden');
-      if (viewName === 'vehicle-zones' && el.viewZones) el.viewZones.classList.remove('hidden');
-      if (viewName === 'interactive-checklist' && el.viewChecklist) el.viewChecklist.classList.remove('hidden');
-      if (viewName === 'data-sync' && el.viewSync) el.viewSync.classList.remove('hidden');
+      const target = {
+        'fta-agent': el.viewFta,
+        'lessons-browser': el.viewLessons,
+        'vehicle-zones': el.viewZones,
+        'interactive-checklist': el.viewChecklist,
+        'data-sync': el.viewSync
+      }[viewName];
 
-      // Desktop Nav update
+      if (target) target.classList.remove('hidden');
+
+      // Update Desktop Tabs
       el.navTabBtns.forEach(btn => {
-        const path = btn.getAttribute('data-nav-tab');
-        if (path === viewName) {
+        const tab = btn.getAttribute('data-nav-tab');
+        if (tab === viewName) {
           btn.className = 'nav-tab-btn active px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 bg-white dark:bg-slate-900 text-sky-600 dark:text-sky-400 shadow-xs';
         } else {
           btn.className = 'nav-tab-btn px-3.5 py-1.5 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all flex items-center gap-1.5';
         }
       });
 
-      // Mobile Nav update
+      // Update Mobile Nav
       el.mobileNavBtns.forEach(btn => {
         const path = btn.getAttribute('data-path');
         if (path === viewName) {
@@ -330,15 +751,22 @@
   function setupKeyboardShortcuts() {
     window.addEventListener('keydown', e => {
       // '/' to focus search
-      if (e.key === '/' && document.activeElement !== el.lessonSearch) {
+      if (e.key === '/' && document.activeElement !== el.lessonSearch && document.activeElement !== el.ftaQueryInput) {
         e.preventDefault();
-        window.switchView('lessons-browser');
-        el.lessonSearch?.focus();
+        if (activeTab === 'fta-agent') {
+          el.ftaQueryInput?.focus();
+        } else {
+          window.switchView('lessons-browser');
+          el.lessonSearch?.focus();
+        }
       }
-      // 'Escape' to close detail drawer / modal
+      // 'Escape' to close modals
       if (e.key === 'Escape') {
         if (el.viewDetail && !el.viewDetail.classList.contains('hidden')) {
           el.viewDetail.classList.add('hidden');
+        }
+        if (el.workOrderModal && !el.workOrderModal.classList.contains('hidden')) {
+          el.workOrderModal.classList.add('hidden');
         }
         if (el.scanModal && !el.scanModal.classList.contains('hidden')) {
           el.scanModal.classList.add('hidden');
@@ -350,177 +778,696 @@
   function updateKPIDashboard() {
     if (el.kpiTotalLessons) el.kpiTotalLessons.textContent = lessons.length;
     if (el.navCountBadge) el.navCountBadge.textContent = lessons.length;
-
-    const verifiedCount = verifiedSlides.size;
-    if (el.kpiVerifiedCount) el.kpiVerifiedCount.textContent = verifiedCount;
+    if (el.kpiVerifiedCount) el.kpiVerifiedCount.textContent = verifiedSlides.size;
     if (el.kpiVerifiedPct) {
-      const pct = lessons.length > 0 ? Math.round((verifiedCount / lessons.length) * 100) : 0;
+      const pct = lessons.length > 0 ? Math.round((verifiedSlides.size / lessons.length) * 100) : 0;
       el.kpiVerifiedPct.textContent = `(${pct}%)`;
     }
-
-    const highRiskCount = lessons.filter(l => l.risk === 'High Risk').length;
-    if (el.kpiHighRisk) el.kpiHighRisk.textContent = highRiskCount;
+    if (el.kpiHighRisk) {
+      const highRiskCount = lessons.filter(l => l.risk === 'High Risk').length;
+      el.kpiHighRisk.textContent = highRiskCount;
+    }
   }
 
-  // --- TECHNICAL SVG DIAGRAM GENERATOR (HUMAN DESIGNED CAD SCHEMATICS) ---
+  // =========================================================================
+  // 1. FTA (FAILURE TREE ANALYSIS) ROOT CAUSE AGENT ENGINE
+  // =========================================================================
+
+  function setupFTAAgent() {
+    if (el.ftaScenarioSelect) {
+      el.ftaScenarioSelect.addEventListener('change', e => {
+        activeScenarioId = e.target.value;
+        customFtaQuery = '';
+        if (el.ftaQueryInput) el.ftaQueryInput.value = '';
+        renderFTAAgent();
+        showToast('Loaded diagnostic scenario: ' + e.target.options[e.target.selectedIndex].text.split('(')[0]);
+      });
+    }
+
+    if (el.ftaRunBtn) {
+      el.ftaRunBtn.addEventListener('click', runFtaDiagnostic);
+    }
+
+    if (el.ftaQueryInput) {
+      el.ftaQueryInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+          runFtaDiagnostic();
+        }
+      });
+    }
+
+    if (el.ftaCreateWoBtn) {
+      el.ftaCreateWoBtn.addEventListener('click', () => {
+        const scenario = getActiveScenario();
+        openWorkOrderModal(scenario.recommendations.map(r => r.type + ': ' + r.text).join('\n'), scenario.primarySlide);
+      });
+    }
+
+    if (el.ftaPrintBtn) {
+      el.ftaPrintBtn.addEventListener('click', () => {
+        window.print();
+      });
+    }
+
+    el.ftaRightTabs.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tab = btn.getAttribute('data-fta-tab');
+        activeFtaTab = tab;
+        el.ftaRightTabs.forEach(b => {
+          b.className = 'fta-tab-btn px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-all';
+        });
+        btn.className = 'fta-tab-btn active px-3 py-1.5 rounded-lg text-xs font-bold bg-white dark:bg-slate-800 text-sky-600 dark:text-sky-400 shadow-xs transition-all';
+        renderFtaTabContent();
+      });
+    });
+  }
+
+  function getActiveScenario() {
+    if (customFtaQuery) {
+      return generateDynamicFtaScenario(customFtaQuery);
+    }
+    return FTA_SCENARIOS.find(s => s.id === activeScenarioId) || FTA_SCENARIOS[0];
+  }
+
+  function generateDynamicFtaScenario(query) {
+    const q = query.toLowerCase();
+    const matched = lessons.filter(l => {
+      const fullText = [l.concern, l.area, l.project, ...l.rootCauses, ...l.countermeasures, ...l.checkPoints].join(' ').toLowerCase();
+      return fullText.includes(q);
+    });
+
+    const topLesson = matched[0] || lessons[9] || lessons[0];
+    const relatedLessons = matched.slice(1, 5);
+
+    const branches = [
+      {
+        id: 'dyn-1',
+        name: topLesson.concern,
+        slideNo: topLesson.slideNo,
+        status: 'root_cause',
+        badgeText: `ROOT CAUSE: ${topLesson.rootCauses[0] ? topLesson.rootCauses[0].slice(0, 32) + '...' : 'Verified fault'} (Slide #${topLesson.slideNo})`,
+        detail: topLesson.rootCauses.join('; ') || 'Primary ingress mechanism identified from historical digital check.'
+      }
+    ];
+
+    relatedLessons.forEach((l, idx) => {
+      branches.push({
+        id: `dyn-${idx + 2}`,
+        name: l.concern,
+        slideNo: l.slideNo,
+        status: idx % 2 === 0 ? 'debunked' : 'verified',
+        badgeText: idx % 2 === 0 ? `Debunked: Clear on Slide #${l.slideNo}` : `Verified: Contributing on Slide #${l.slideNo}`,
+        detail: l.countermeasures[0] || 'Inspection standard verified on line.'
+      });
+    });
+
+    if (branches.length < 4) {
+      branches.push({
+        id: 'dyn-filler-1',
+        name: 'Floor pan e-coat oval drainage plug seated',
+        slideNo: 35,
+        status: 'debunked',
+        badgeText: 'Debunked: 360° flush fit confirmed',
+        detail: 'Underbody inspection confirmed all plugs sealed with intact PVC wax boundary.'
+      });
+      branches.push({
+        id: 'dyn-filler-2',
+        name: 'Door weatherstrip aero lip clearance',
+        slideNo: 5,
+        status: 'debunked',
+        badgeText: 'Debunked: Lip retention >150N',
+        detail: 'Aero lip contact load meets standard specification.'
+      });
+    }
+
+    return {
+      id: 'dynamic-search',
+      title: `AI Root Cause Analysis for: "${query}"`,
+      symptom: `${query.toUpperCase()} INGRESS`,
+      vehicle: `${topLesson.project} (Commercial Model)`,
+      confidence: 91,
+      rootCauseSummary: `${topLesson.concern}: ${topLesson.rootCauses[0] || 'Failure mechanism isolated.'}`,
+      primarySlide: topLesson.slideNo,
+      evidenceSlides: [topLesson.slideNo, ...relatedLessons.map(l => l.slideNo)].slice(0, 4),
+      branches: branches,
+      chain: [
+        { step: 1, title: 'Symptom Query Received', desc: `Diagnostic query "${query}" matched ${matched.length} historical lessons across 17 inspection zones.` },
+        { step: 2, title: 'Exclusion of Unrelated Zones', desc: 'Hypotheses outside water ingress boundary tested and ruled out as secondary.' },
+        { step: 3, title: 'Root Cause Isolation', desc: `Slide #${topLesson.slideNo} (${topLesson.area}) isolated as the principal root cause failure mode.` },
+        { step: 4, title: 'Countermeasure Corroboration', desc: topLesson.countermeasures[0] || 'Standard containment countermeasure validated.' },
+        { step: 5, title: 'Recommended Quality Verification', desc: topLesson.checkPoints[0] || 'Mandatory 100% verification on the line.' }
+      ],
+      recommendations: topLesson.countermeasures.map(c => ({ type: 'Execute', text: c })).concat(
+        topLesson.checkPoints.map(cp => ({ type: 'Verify', text: cp }))
+      ).slice(0, 3),
+      defaultWorkOrder: {
+        id: 'WO-' + Date.now().toString().slice(-6),
+        status: 'Draft',
+        description: `Execute containment for ${topLesson.concern} (Slide #${topLesson.slideNo})`,
+        equipment: `${topLesson.project} - LLR #${topLesson.slideNo}`,
+        plant: 'Plant 1 · Service Bay',
+        priority: 'High',
+        assignedTo: 'Nikit (Techline Specialist)',
+        dueDate: 'Today',
+        estimatedHours: '1.5'
+      }
+    };
+  }
+
+  function runFtaDiagnostic() {
+    const query = el.ftaQueryInput?.value.trim();
+    if (query) {
+      customFtaQuery = query;
+      showToast(`AI FTA Agent analyzing 76 lessons for: "${query}"...`);
+    } else {
+      customFtaQuery = '';
+      showToast('Evaluating active fault tree scenario...');
+    }
+
+    // Animation feedback
+    if (el.ftaTreeContainer) {
+      el.ftaTreeContainer.classList.add('opacity-50');
+      setTimeout(() => {
+        el.ftaTreeContainer.classList.remove('opacity-50');
+        renderFTAAgent();
+        showToast('Fault Tree Analysis (FTA) diagnostic complete.');
+      }, 350);
+    } else {
+      renderFTAAgent();
+    }
+  }
+
+  function renderFTAAgent() {
+    const scenario = getActiveScenario();
+
+    // Set Header Info
+    if (el.ftaIncidentTitle) {
+      el.ftaIncidentTitle.textContent = scenario.title;
+    }
+    if (el.ftaConfidenceBadge) {
+      el.ftaConfidenceBadge.textContent = `Confidence: High ${scenario.confidence}%`;
+    }
+    if (el.ftaIncidentDesc) {
+      el.ftaIncidentDesc.textContent = scenario.rootCauseSummary;
+    }
+
+    // Render 1: Interactive FTA Tree (Visual Graph matching UptimeAI style)
+    renderFTATree(scenario);
+
+    // Render 2: Diagnostic Reasoning Chain (5 steps)
+    renderFTAChain(scenario);
+
+    // Render 3: Tabbed Panel (Recommendations, Work Orders, Documents, System Details)
+    renderFtaTabContent(scenario);
+  }
+
+  function renderFTATree(scenario) {
+    if (!el.ftaTreeContainer) return;
+
+    const branches = scenario.branches || [];
+    const totalBranches = branches.length;
+
+    // Build the visual SVG + HTML Tree matching Image 1 (UptimeAI Root Cause Agent)
+    // Left: Root symptom pill; Center: Branching lines & hypotheses; Right: Status Badges (Debunked / Root Cause)
+    
+    let html = `
+      <div class="relative w-full py-4 px-2 sm:px-6 overflow-x-auto min-w-[720px] select-none">
+        
+        <!-- Legend bar -->
+        <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-200 dark:border-slate-800 text-xs flex-wrap gap-2">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-orange-500 animate-pulse"></span>
+            <span class="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-[11px]">Active FTA Fault Tree</span>
+            <span class="text-slate-400 font-mono text-[11px]">(${totalBranches} Hypothesis Branches)</span>
+          </div>
+          <div class="flex items-center gap-2 text-[11px] font-mono">
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-orange-100 text-orange-800 dark:bg-orange-950/80 dark:text-orange-400 border border-orange-200 dark:border-orange-800 font-bold">
+              <span class="w-1.5 h-1.5 rounded-full bg-orange-500"></span> ROOT CAUSE
+            </span>
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+              <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> Debunked
+            </span>
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Verified
+            </span>
+          </div>
+        </div>
+
+        <div class="relative flex items-center justify-between gap-6 py-2">
+          
+          <!-- LEFT: Root Symptom Node (Dark Pill matching UptimeAI screenshot) -->
+          <div class="shrink-0 z-10 w-44 sm:w-48 p-3.5 rounded-2xl bg-[#0b1326] text-white border-2 border-sky-500/80 shadow-lg shadow-sky-500/10 flex flex-col justify-center">
+            <div class="flex items-center gap-1.5 text-sky-400 text-[10px] font-mono font-bold uppercase tracking-wider mb-1">
+              <span class="material-symbols-outlined text-[14px]">report_problem</span>
+              <span>Observed Top Event</span>
+            </div>
+            <div class="text-xs sm:text-sm font-extrabold leading-snug">
+              ${escapeHTML(scenario.symptom)}
+            </div>
+            <div class="text-[10px] text-slate-400 mt-1.5 font-mono">
+              ${escapeHTML(scenario.vehicle)}
+            </div>
+          </div>
+
+          <!-- CENTER & RIGHT: Branching Container with SVG connector lines and nodes -->
+          <div class="flex-1 relative space-y-3.5 pl-6">
+            <!-- SVG connector curves rendered behind -->
+            <svg class="absolute inset-0 w-full h-full pointer-events-none -left-6" preserveAspectRatio="none">
+              ${branches.map((b, idx) => {
+                const total = branches.length;
+                const startY = 50; // percentage height from root node center
+                const endY = ((idx + 0.5) / total) * 100;
+                return `
+                  <path
+                    d="M 0 ${startY}% C 40% ${startY}%, 40% ${endY}%, 100% ${endY}%"
+                    fill="none"
+                    stroke="${b.status === 'root_cause' ? '#f97316' : b.status === 'verified' ? '#10b981' : '#64748b'}"
+                    stroke-width="${b.status === 'root_cause' ? '2.5' : '1.5'}"
+                    stroke-opacity="${b.status === 'root_cause' ? '1' : '0.65'}"
+                    stroke-dasharray="${b.status === 'debunked' ? '4 3' : 'none'}"
+                  />
+                `;
+              }).join('')}
+            </svg>
+
+            <!-- Hypothesis & Terminal Status Nodes -->
+            ${branches.map(b => {
+              const isRootCause = b.status === 'root_cause';
+              const isDebunked = b.status === 'debunked';
+              const isVerified = b.status === 'verified';
+
+              // Visual styling matching UptimeAI screenshot
+              let statusClass = '';
+              let badgeColor = '';
+              if (isRootCause) {
+                statusClass = 'border-orange-500/80 bg-orange-50/80 dark:bg-orange-950/40 text-slate-900 dark:text-white ring-2 ring-orange-500/40 shadow-md';
+                badgeColor = 'bg-orange-600 text-white font-black tracking-wide shadow-xs';
+              } else if (isDebunked) {
+                statusClass = 'border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-[#0f172a]/90 text-slate-600 dark:text-slate-400 opacity-90';
+                badgeColor = 'bg-[#1e293b] text-slate-300 font-bold';
+              } else if (isVerified) {
+                statusClass = 'border-emerald-500/60 bg-emerald-50/60 dark:bg-emerald-950/30 text-slate-900 dark:text-white';
+                badgeColor = 'bg-emerald-700 text-white font-bold';
+              } else {
+                statusClass = 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300';
+                badgeColor = 'bg-slate-700 text-white font-semibold';
+              }
+
+              return `
+                <div class="relative z-10 flex items-center justify-between gap-3 p-3 rounded-2xl border transition-all duration-200 hover:shadow-md ${statusClass} group cursor-pointer fta-branch-node" data-branch-id="${b.id}" data-slide="${b.slideNo}">
+                  
+                  <!-- Hypothesis Name & Slide Link -->
+                  <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                    <span class="w-2 h-2 rounded-full shrink-0 ${isRootCause ? 'bg-orange-500 animate-ping' : isDebunked ? 'bg-slate-400' : 'bg-emerald-500'}"></span>
+                    <div class="min-w-0">
+                      <div class="flex items-center gap-1.5 flex-wrap">
+                        <span class="text-xs font-bold truncate ${isRootCause ? 'text-orange-950 dark:text-orange-200 font-extrabold' : ''}">${escapeHTML(b.name)}</span>
+                        ${b.slideNo ? `<button class="inspect-slide-btn px-1.5 py-0.2 rounded text-[10px] font-mono font-bold bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300 hover:bg-sky-200 transition-colors" data-slide="${b.slideNo}" title="Open LLR Slide #${b.slideNo} Sheet">LLR #${b.slideNo}</button>` : ''}
+                      </div>
+                      <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">${escapeHTML(b.detail)}</p>
+                    </div>
+                  </div>
+
+                  <!-- Terminal Status Badge (matching UptimeAI screenshot top right) -->
+                  <div class="shrink-0 flex items-center gap-1.5">
+                    <span class="px-2.5 py-1 rounded-xl text-[11px] font-mono uppercase tracking-wider ${badgeColor}">
+                      ${escapeHTML(b.badgeText)}
+                    </span>
+                    
+                    <!-- Quick Toggle Status Button -->
+                    <div class="hidden group-hover:flex items-center gap-1 bg-white/90 dark:bg-slate-800/90 rounded-lg p-0.5 border border-slate-200 dark:border-slate-700 shadow-xs">
+                      <button class="toggle-status-btn px-1.5 py-0.5 rounded text-[10px] font-bold text-orange-600 hover:bg-orange-100 dark:hover:bg-orange-950" data-branch-id="${b.id}" data-set-status="root_cause" title="Mark as Root Cause">Root</button>
+                      <button class="toggle-status-btn px-1.5 py-0.5 rounded text-[10px] font-bold text-slate-600 hover:bg-slate-200 dark:hover:bg-slate-700" data-branch-id="${b.id}" data-set-status="debunked" title="Mark as Debunked">Debunk</button>
+                    </div>
+                  </div>
+
+                </div>
+              `;
+            }).join('')}
+          </div>
+
+        </div>
+
+      </div>
+    `;
+
+    el.ftaTreeContainer.innerHTML = html;
+    attachFtaTreeListeners(scenario);
+  }
+
+  function attachFtaTreeListeners(scenario) {
+    // Inspect Slide
+    document.querySelectorAll('.inspect-slide-btn').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        const slideNo = parseInt(btn.getAttribute('data-slide'), 10);
+        openDetailDrawer(slideNo);
+      });
+    });
+
+    // Toggle Status
+    document.querySelectorAll('.toggle-status-btn').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        const branchId = btn.getAttribute('data-branch-id');
+        const newStatus = btn.getAttribute('data-set-status');
+        const branch = scenario.branches.find(b => b.id === branchId);
+        if (branch) {
+          branch.status = newStatus;
+          if (newStatus === 'root_cause') {
+            branch.badgeText = `ROOT CAUSE: ${branch.name.slice(0, 28)}`;
+            scenario.branches.forEach(b => {
+              if (b.id !== branchId && b.status === 'root_cause') {
+                b.status = 'verified';
+                b.badgeText = `Verified: Contributory`;
+              }
+            });
+            showToast(`Hypothesis "${branch.name}" marked as isolated ROOT CAUSE.`);
+          } else if (newStatus === 'debunked') {
+            branch.badgeText = `Debunked: Test verified negative`;
+            showToast(`Hypothesis "${branch.name}" marked as DEBUNKED.`);
+          }
+          renderFTAAgent();
+        }
+      });
+    });
+
+    // Click branch node to preview slide
+    document.querySelectorAll('.fta-branch-node').forEach(node => {
+      node.addEventListener('click', () => {
+        const slideNo = parseInt(node.getAttribute('data-slide'), 10);
+        if (slideNo) openDetailDrawer(slideNo);
+      });
+    });
+  }
+
+  function renderFTAChain(scenario) {
+    if (!el.ftaChainContainer) return;
+
+    const chain = scenario.chain || [];
+
+    el.ftaChainContainer.innerHTML = `
+      <div class="space-y-3">
+        <div class="flex items-center justify-between pb-1">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-sky-600 dark:text-sky-400 text-[18px]">account_tree</span>
+            <span class="text-xs font-mono font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Diagnostic Chain (${chain.length} Steps)</span>
+          </div>
+          <span class="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
+            Validated by Techline
+          </span>
+        </div>
+
+        <div class="relative pl-6 space-y-3 border-l-2 border-slate-200 dark:border-slate-800 ml-2">
+          ${chain.map((c, i) => `
+            <div class="relative group">
+              <span class="absolute -left-[31px] top-0.5 w-5 h-5 rounded-full bg-slate-900 text-white dark:bg-sky-600 text-[10px] font-mono font-bold flex items-center justify-center ring-4 ring-white dark:ring-[#0f172a]">
+                ${c.step}
+              </span>
+              <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-850/60 border border-slate-200/80 dark:border-slate-800 text-xs">
+                <span class="font-extrabold text-slate-900 dark:text-white block">${escapeHTML(c.title)}</span>
+                <p class="text-slate-600 dark:text-slate-300 mt-1 leading-relaxed text-[11px]">${escapeHTML(c.desc)}</p>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  function renderFtaTabContent(scenarioParam) {
+    if (!el.ftaTabContent) return;
+    const scenario = scenarioParam || getActiveScenario();
+
+    if (activeFtaTab === 'recommendations') {
+      const recs = scenario.recommendations || [];
+      el.ftaTabContent.innerHTML = `
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold uppercase tracking-wider text-slate-400">Actionable Recommendations</span>
+            <button id="convert-wo-btn" class="h-8 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold flex items-center gap-1 transition-all active:scale-95 shadow-xs" type="button">
+              <span class="material-symbols-outlined text-[15px]">post_add</span> Create Work Order
+            </button>
+          </div>
+
+          <div class="space-y-2.5">
+            ${recs.map((r, idx) => `
+              <div class="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 text-xs space-y-1">
+                <div class="flex items-center gap-1.5 text-sky-600 dark:text-sky-400 font-bold uppercase text-[10px] font-mono">
+                  <span class="w-1.5 h-1.5 rounded-full bg-sky-500"></span>
+                  <span>${idx + 1}. ${escapeHTML(r.type)}</span>
+                </div>
+                <p class="text-slate-800 dark:text-slate-200 font-medium leading-relaxed pl-3 text-[11px]">
+                  ${escapeHTML(r.text)}
+                </p>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+
+      document.getElementById('convert-wo-btn')?.addEventListener('click', () => {
+        openWorkOrderModal(recs.map(r => r.type + ': ' + r.text).join('\n'), scenario.primarySlide);
+      });
+
+    } else if (activeFtaTab === 'workorders') {
+      el.ftaTabContent.innerHTML = `
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold uppercase tracking-wider text-slate-400">Assigned Work Orders (${workOrders.length})</span>
+            <button id="wo-create-new-btn" class="h-8 px-3 rounded-lg bg-sky-600 hover:bg-sky-700 text-white text-[11px] font-bold flex items-center gap-1 transition-all active:scale-95 shadow-xs" type="button">
+              <span class="material-symbols-outlined text-[15px]">add</span> New Work Order
+            </button>
+          </div>
+
+          <div class="space-y-2.5">
+            ${workOrders.map((wo, idx) => `
+              <div class="p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/90 text-xs space-y-2 shadow-xs">
+                <div class="flex items-center justify-between">
+                  <span class="font-mono font-bold text-sky-600 dark:text-sky-400">${wo.id}</span>
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                    wo.status === 'Completed'
+                      ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-400'
+                      : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-400'
+                  }">${wo.status}</span>
+                </div>
+                <p class="text-slate-900 dark:text-white font-bold leading-snug">${escapeHTML(wo.description)}</p>
+                <div class="grid grid-cols-2 gap-2 text-[10px] font-mono text-slate-500 pt-1 border-t border-slate-100 dark:border-slate-800">
+                  <div>Assigned: <strong class="text-slate-800 dark:text-slate-200">${escapeHTML(wo.assignedTo)}</strong></div>
+                  <div>Due: <strong class="text-slate-800 dark:text-slate-200">${escapeHTML(wo.dueDate || 'Today')}</strong></div>
+                  <div>Target: <span class="text-slate-700 dark:text-slate-300">${escapeHTML(wo.equipment || 'Vehicle')}</span></div>
+                  <div>Est: <span class="text-slate-700 dark:text-slate-300">${escapeHTML(wo.estimatedHours || '1.0')} hrs</span></div>
+                </div>
+                <div class="pt-1 flex justify-end gap-1.5">
+                  <button class="dispatch-wo-btn px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400 text-[10px] font-bold hover:bg-emerald-100" data-wo-idx="${idx}">
+                    ${wo.status === 'Completed' ? 'Re-open' : 'Mark Completed'}
+                  </button>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+
+      document.getElementById('wo-create-new-btn')?.addEventListener('click', () => {
+        openWorkOrderModal();
+      });
+
+      document.querySelectorAll('.dispatch-wo-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = parseInt(btn.getAttribute('data-wo-idx'), 10);
+          if (workOrders[idx]) {
+            workOrders[idx].status = workOrders[idx].status === 'Completed' ? 'In Progress' : 'Completed';
+            saveWorkOrders();
+            renderFtaTabContent(scenario);
+            showToast(`Work Order #${workOrders[idx].id} status updated to ${workOrders[idx].status}.`);
+          }
+        });
+      });
+
+    } else if (activeFtaTab === 'documents') {
+      const slides = scenario.evidenceSlides || [scenario.primarySlide];
+      const matchedLessons = lessons.filter(l => slides.includes(l.slideNo));
+
+      el.ftaTabContent.innerHTML = `
+        <div class="space-y-3">
+          <span class="text-xs font-mono font-bold uppercase tracking-wider text-slate-400 block">LLR Evidence Sheets (${matchedLessons.length})</span>
+          <div class="space-y-2">
+            ${matchedLessons.map(l => `
+              <div class="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 text-xs flex items-center justify-between gap-2 hover:border-sky-500 transition-colors cursor-pointer" onclick="openDetailDrawer(${l.slideNo})">
+                <div class="min-w-0">
+                  <div class="flex items-center gap-1.5">
+                    <span class="font-mono font-bold text-sky-600 dark:text-sky-400">Slide #${l.slideNo}</span>
+                    <span class="font-semibold text-slate-900 dark:text-white truncate">${escapeHTML(l.concern)}</span>
+                  </div>
+                  <span class="text-[10px] text-slate-400 font-mono">${escapeHTML(l.area)} • ${escapeHTML(l.project)}</span>
+                </div>
+                <button class="shrink-0 p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[11px] font-bold">
+                  View
+                </button>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    } else if (activeFtaTab === 'system') {
+      el.ftaTabContent.innerHTML = `
+        <div class="space-y-3">
+          <span class="text-xs font-mono font-bold uppercase tracking-wider text-slate-400 block">Vehicle & Plant System Details</span>
+          <div class="p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 text-xs space-y-2 font-mono">
+            <div class="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
+              <span class="text-slate-400">VIN</span>
+              <span class="font-bold text-slate-900 dark:text-white">8XF-90214</span>
+            </div>
+            <div class="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
+              <span class="text-slate-400">Model Platform</span>
+              <span class="font-bold text-slate-900 dark:text-white">${scenario.vehicle}</span>
+            </div>
+            <div class="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
+              <span class="text-slate-400">Primary LLR Ref</span>
+              <span class="font-bold text-sky-600 dark:text-sky-400">Slide #${scenario.primarySlide}</span>
+            </div>
+            <div class="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
+              <span class="text-slate-400">Assembly Line</span>
+              <span class="font-bold text-slate-900 dark:text-white">Trim & Final · Line 3</span>
+            </div>
+            <div class="flex justify-between py-1">
+              <span class="text-slate-400">Shower Test Spec</span>
+              <span class="font-bold text-emerald-600 dark:text-emerald-400">2.5 bar / 20 min</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  // =========================================================================
+  // 2. WORK ORDER NOTIFICATION MODAL ENGINE (Matching Screenshot)
+  // =========================================================================
+
+  function setupWorkOrderModal() {
+    if (el.closeWoModal) el.closeWoModal.addEventListener('click', closeWorkOrderModal);
+    if (el.cancelWoBtn) el.cancelWoBtn.addEventListener('click', closeWorkOrderModal);
+
+    if (el.confirmWoBtn) {
+      el.confirmWoBtn.addEventListener('click', () => {
+        const desc = el.woDesc?.value.trim() || 'Laser align and re-route butyl bead';
+        const priority = el.woPriority?.value || 'High';
+        const dueDate = el.woDueDate?.value || new Date().toISOString().slice(0, 10);
+        const assignedTo = el.woAssignee?.value || 'Nikit (Techline Specialist)';
+        const hours = el.woHours?.value || '1.5';
+
+        const newWo = {
+          id: 'WO-' + Date.now().toString().slice(-6),
+          status: 'Draft',
+          description: desc,
+          equipment: `Vehicle #${Math.floor(100000 + Math.random() * 900000)}`,
+          plant: 'Plant 1 · Service Bay',
+          priority: priority,
+          assignedTo: assignedTo,
+          dueDate: dueDate,
+          estimatedHours: hours
+        };
+
+        workOrders.unshift(newWo);
+        saveWorkOrders();
+        closeWorkOrderModal();
+        renderFtaTabContent();
+        showToast(`Work Order #${newWo.id} created & assigned to ${assignedTo}!`);
+      });
+    }
+  }
+
+  function openWorkOrderModal(presetDesc, slideNo) {
+    if (!el.workOrderModal) return;
+    if (el.woDesc && presetDesc) el.woDesc.value = presetDesc;
+    if (el.woDueDate) el.woDueDate.value = new Date().toISOString().slice(0, 10);
+    el.workOrderModal.classList.remove('hidden');
+    el.woDesc?.focus();
+  }
+
+  function closeWorkOrderModal() {
+    if (el.workOrderModal) el.workOrderModal.classList.add('hidden');
+  }
+
+  // =========================================================================
+  // 3. TECHNICAL CAD VECTOR SCHEMATICS (Human-Crafted 1:1 Scale SVG)
+  // =========================================================================
+
   function getTechnicalDiagramSVG(area, slideNo) {
     const a = (area || '').toLowerCase();
 
-    // 1. Harness Clips & Fasteners
+    // 1. Clips / Fasteners
     if (a.includes('clip') || a.includes('fastener')) {
       return `
         <svg class="w-full h-24 select-none" viewBox="0 0 400 96" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <!-- Background Blueprint Grid -->
           <rect width="400" height="96" fill="#0f172a" rx="12"></rect>
           <path d="M 0 24 H 400 M 0 48 H 400 M 0 72 H 400" stroke="#1e293b" stroke-width="1"></path>
-          <path d="M 50 0 V 96 M 150 0 V 96 M 250 0 V 96 M 350 0 V 96" stroke="#1e293b" stroke-width="1"></path>
-          
-          <!-- Sheet Metal Panel -->
-          <rect x="30" y="44" width="340" height="8" rx="1" fill="#64748b"></rect>
-          <!-- Metal Aperture Hole -->
-          <rect x="180" y="44" width="40" height="8" fill="#0f172a"></rect>
-          
-          <!-- EPT Foam Washer (Black/Dark with Compression Marks) -->
-          <rect x="160" y="38" width="80" height="6" rx="2" fill="#10b981" stroke="#34d399" stroke-width="1"></rect>
-          <text x="200" y="34" fill="#34d399" font-family="JetBrains Mono" font-size="8" font-weight="700" text-anchor="middle">1.0mm EPT FOAM RING (≥50% DEFLECTION)</text>
-          
-          <!-- Nylon Clip Body & Retention Barb -->
-          <path d="M 175 16 H 225 V 38 H 215 V 74 L 200 82 L 185 74 V 38 H 175 Z" fill="#0284c7" stroke="#38bdf8" stroke-width="1.5"></path>
-          <path d="M 185 52 L 170 60 L 185 64 Z" fill="#38bdf8"></path>
-          <path d="M 215 52 L 230 60 L 215 64 Z" fill="#38bdf8"></path>
-          
-          <!-- Dimension Arrows -->
-          <path d="M 155 38 V 44" stroke="#a7f3d0" stroke-width="1"></path>
-          <text x="75" y="24" fill="#94a3b8" font-family="JetBrains Mono" font-size="8" font-weight="600">SHEET METAL INNER</text>
-          <text x="325" y="78" fill="#38bdf8" font-family="JetBrains Mono" font-size="8" font-weight="700">DUAL BARB LOCK</text>
+          <path d="M 100 0 V 96 M 200 0 V 96 M 300 0 V 96" stroke="#1e293b" stroke-width="1"></path>
+          <line x1="30" y1="48" x2="370" y2="48" stroke="#475569" stroke-width="5" stroke-linecap="round"></line>
+          <line x1="180" y1="48" x2="220" y2="48" stroke="#0f172a" stroke-width="7"></line>
+          <rect x="172" y="42" width="56" height="12" rx="3" fill="#10b981" stroke="#34d399" stroke-width="1.5"></rect>
+          <path d="M 195 24 V 46 L 190 56 L 200 70 L 210 56 L 205 46 V 24 Z" fill="#38bdf8" stroke="#0284c7" stroke-width="1.5"></path>
+          <circle cx="200" cy="24" r="14" fill="#0284c7" opacity="0.3"></circle>
+          <text x="200" y="16" fill="#38bdf8" font-family="JetBrains Mono" font-size="8.5" font-weight="700" text-anchor="middle">CLOSED-CELL EPT FOAM GASKET (T=1.0mm)</text>
+          <text x="50" y="44" fill="#94a3b8" font-family="JetBrains Mono" font-size="8" font-weight="600">DOOR INNER PANEL</text>
+          <text x="245" y="65" fill="#34d399" font-family="JetBrains Mono" font-size="8" font-weight="700">COMPRESSION SEAL &gt; 40%</text>
         </svg>
       `;
     }
 
-    // 2. Door Sealing Screen & Butyl Path
-    if (a.includes('sealing screen') || a.includes('butyl')) {
+    // 2. Sealing Screen & Butyl Path
+    if (a.includes('sealing screen') || a.includes('screen')) {
       return `
         <svg class="w-full h-24 select-none" viewBox="0 0 400 96" fill="none" xmlns="http://www.w3.org/2000/svg">
           <rect width="400" height="96" fill="#0f172a" rx="12"></rect>
           <path d="M 0 24 H 400 M 0 48 H 400 M 0 72 H 400" stroke="#1e293b" stroke-width="1"></path>
-          
-          <!-- Door Inner Steel Profile -->
-          <path d="M 20 70 L 100 70 L 140 40 L 380 40" stroke="#64748b" stroke-width="5" stroke-linecap="round"></path>
-          
-          <!-- Continuous Polyurethane Butyl Bead -->
-          <circle cx="160" cy="40" r="7" fill="#10b981" stroke="#34d399" stroke-width="1.5"></circle>
-          
-          <!-- PE Sealing Screen Layer (Translucent Blue) -->
-          <path d="M 20 66 L 98 66 L 138 34 L 380 34" stroke="#0284c7" stroke-width="2" stroke-dasharray="6 3"></path>
-          
-          <!-- Clip Position Hole with Dimension Arrow -->
-          <circle cx="280" cy="40" r="4" fill="#38bdf8"></circle>
-          <line x1="160" y1="20" x2="280" y2="20" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="2 2"></line>
-          <line x1="160" y1="16" x2="160" y2="24" stroke="#f59e0b" stroke-width="1.5"></line>
-          <line x1="280" y1="16" x2="280" y2="24" stroke="#f59e0b" stroke-width="1.5"></line>
-          <text x="220" y="14" fill="#fbbf24" font-family="JetBrains Mono" font-size="8.5" font-weight="700" text-anchor="middle">OFFSET ≥ 70 mm (KOREN THEME)</text>
-          
-          <text x="60" y="86" fill="#94a3b8" font-family="JetBrains Mono" font-size="8" font-weight="600">DOOR INNER HEM</text>
-          <text x="310" y="60" fill="#38bdf8" font-family="JetBrains Mono" font-size="8" font-weight="600">HARNESS CLIP LOCATOR</text>
+          <path d="M 120 0 V 96 M 240 0 V 96" stroke="#1e293b" stroke-width="1"></path>
+          <rect x="40" y="46" width="320" height="4" fill="#64748b"></rect>
+          <path d="M 40 40 C 100 40 180 32 360 32" stroke="#38bdf8" stroke-width="3" stroke-dasharray="4 2"></path>
+          <ellipse cx="260" cy="46" rx="8" ry="5" fill="#f59e0b" stroke="#fbbf24" stroke-width="1.5"></ellipse>
+          <circle cx="100" cy="46" r="6" fill="#ef4444"></circle>
+          <line x1="100" y1="24" x2="260" y2="24" stroke="#34d399" stroke-width="1.5"></line>
+          <path d="M 100 21 L 96 24 L 100 27 M 260 21 L 264 24 L 260 27" stroke="#34d399" stroke-width="1.5"></path>
+          <text x="180" y="19" fill="#34d399" font-family="JetBrains Mono" font-size="8.5" font-weight="700" text-anchor="middle">CLEARANCE ≥ 70mm (NDS RULE)</text>
+          <text x="100" y="65" fill="#f87171" font-family="JetBrains Mono" font-size="8" font-weight="600" text-anchor="middle">HARNESS CLIP HOLE</text>
+          <text x="260" y="65" fill="#fbbf24" font-family="JetBrains Mono" font-size="8" font-weight="600" text-anchor="middle">BUTYL ADHESIVE BEAD</text>
         </svg>
       `;
     }
 
-    // 3. Floor Pan, E-Coat Holes & Body Plugs
-    if (a.includes('floor') || a.includes('underbody') || a.includes('holes') || a.includes('plugs') || a.includes('grommets')) {
+    // 3. Floor & Plugs
+    if (a.includes('floor') || a.includes('plug') || a.includes('grommet') || a.includes('hole')) {
       return `
         <svg class="w-full h-24 select-none" viewBox="0 0 400 96" fill="none" xmlns="http://www.w3.org/2000/svg">
           <rect width="400" height="96" fill="#0f172a" rx="12"></rect>
-          <path d="M 0 32 H 400 M 0 64 H 400" stroke="#1e293b" stroke-width="1"></path>
-          
-          <!-- Stamped Floor Recess -->
-          <path d="M 30 40 H 140 L 155 58 H 245 L 260 40 H 370" stroke="#64748b" stroke-width="4" fill="none"></path>
-          
-          <!-- EPDM Rubber Flush Plug -->
-          <path d="M 145 54 H 255 V 60 C 255 64 240 68 200 68 C 160 68 145 64 145 60 Z" fill="#10b981" stroke="#34d399" stroke-width="1.5"></path>
-          <ellipse cx="200" cy="54" rx="48" ry="4" fill="#059669"></ellipse>
-          
-          <!-- Splash Vector Arrows (Blocked) -->
-          <path d="M 200 88 V 74 M 180 86 L 190 74 M 220 86 L 210 74" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="2 2"></path>
-          
-          <text x="200" y="24" fill="#34d399" font-family="JetBrains Mono" font-size="8.5" font-weight="700" text-anchor="middle">360° EPDM LIP FLUSH CONTACT (ZERO SPLASH)</text>
-          <text x="80" y="32" fill="#94a3b8" font-family="JetBrains Mono" font-size="8" font-weight="600">STAMPED FLOOR PAN</text>
-          <text x="200" y="80" fill="#f87171" font-family="JetBrains Mono" font-size="7.5" font-weight="600" text-anchor="middle">ROAD SPLASH BARRIER</text>
+          <path d="M 0 24 H 400 M 0 48 H 400 M 0 72 H 400" stroke="#1e293b" stroke-width="1"></path>
+          <path d="M 140 0 V 96 M 260 0 V 96" stroke="#1e293b" stroke-width="1"></path>
+          <line x1="30" y1="46" x2="160" y2="46" stroke="#64748b" stroke-width="6"></line>
+          <line x1="240" y1="46" x2="370" y2="46" stroke="#64748b" stroke-width="6"></line>
+          <path d="M 155 42 H 245 V 48 H 230 C 230 62 215 68 200 68 C 185 68 170 62 170 48 H 155 Z" fill="#0284c7" stroke="#38bdf8" stroke-width="1.5"></path>
+          <ellipse cx="200" cy="46" rx="42" ry="3" fill="#10b981" opacity="0.6"></ellipse>
+          <text x="200" y="20" fill="#38bdf8" font-family="JetBrains Mono" font-size="8.5" font-weight="700" text-anchor="middle">E-COAT DRAIN HOLE (360° CONTACT FLANGE)</text>
+          <text x="70" y="60" fill="#94a3b8" font-family="JetBrains Mono" font-size="8" font-weight="600">FLOOR SHEET METAL</text>
+          <text x="325" y="60" fill="#34d399" font-family="JetBrains Mono" font-size="8" font-weight="700">FLUSH SEAL</text>
         </svg>
       `;
     }
 
-    // 4. Cowl, Firewall & HVAC
+    // 4. Cowl & HVAC
     if (a.includes('cowl') || a.includes('hvac')) {
       return `
         <svg class="w-full h-24 select-none" viewBox="0 0 400 96" fill="none" xmlns="http://www.w3.org/2000/svg">
           <rect width="400" height="96" fill="#0f172a" rx="12"></rect>
-          <path d="M 0 32 H 400 M 0 64 H 400" stroke="#1e293b" stroke-width="1"></path>
-          
-          <!-- Water Box Chamber -->
-          <path d="M 40 30 H 130 V 70 H 260 V 45 H 360" stroke="#64748b" stroke-width="4" fill="none"></path>
-          
-          <!-- Stopper Plate Rib (Height >= 37mm) -->
-          <rect x="254" y="20" width="8" height="42" fill="#10b981" stroke="#34d399" stroke-width="1"></rect>
-          <line x1="268" y1="20" x2="268" y2="62" stroke="#fbbf24" stroke-width="1.5"></line>
-          <line x1="264" y1="20" x2="272" y2="20" stroke="#fbbf24" stroke-width="1.5"></line>
-          <line x1="264" y1="62" x2="272" y2="62" stroke="#fbbf24" stroke-width="1.5"></line>
-          <text x="325" y="44" fill="#fbbf24" font-family="JetBrains Mono" font-size="8" font-weight="700">HEIGHT ≥ 37mm</text>
-          
-          <!-- Polyurethane Butyl Bead Path -->
-          <circle cx="125" cy="70" r="6" fill="#0284c7" stroke="#38bdf8" stroke-width="1"></circle>
-          
-          <text x="90" y="22" fill="#94a3b8" font-family="JetBrains Mono" font-size="8" font-weight="600">HVAC AIR INTAKE</text>
-          <text x="140" y="86" fill="#38bdf8" font-family="JetBrains Mono" font-size="8" font-weight="700">CONTINUOUS ROBOT BUTYL</text>
-        </svg>
-      `;
-    }
-
-    // 5. Body Welt, Weatherstrip & Glass Runner
-    if (a.includes('welt') || a.includes('weatherstrip') || a.includes('glass')) {
-      return `
-        <svg class="w-full h-24 select-none" viewBox="0 0 400 96" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="400" height="96" fill="#0f172a" rx="12"></rect>
-          <path d="M 0 32 H 400 M 0 64 H 400" stroke="#1e293b" stroke-width="1"></path>
-          
-          <!-- Door Sash Metal Flange -->
-          <path d="M 40 48 H 150 V 20 H 158 V 80 H 150 V 56 H 40" fill="#64748b"></path>
-          
-          <!-- EPDM Bulb Profile (Hollow Sealing Bulb) -->
-          <ellipse cx="230" cy="50" rx="28" ry="24" fill="#1e293b" stroke="#10b981" stroke-width="3"></ellipse>
-          
-          <!-- Aero Lip with Zero-Flock Barrier -->
-          <path d="M 158 35 Q 185 30 202 50" stroke="#34d399" stroke-width="3" fill="none"></path>
-          
-          <!-- Door Closing Contact Vector -->
-          <path d="M 290 50 L 265 50" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)"></path>
-          
-          <text x="230" y="20" fill="#34d399" font-family="JetBrains Mono" font-size="8" font-weight="700" text-anchor="middle">NO FLOCK ON AERO LIP (CAPILLARY ARREST)</text>
-          <text x="95" y="42" fill="#94a3b8" font-family="JetBrains Mono" font-size="8" font-weight="600">DOOR SASH</text>
-          <text x="325" y="54" fill="#38bdf8" font-family="JetBrains Mono" font-size="8" font-weight="700">COMPRESSION FIT</text>
-        </svg>
-      `;
-    }
-
-    // 6. Lamps & Lighting
-    if (a.includes('lamp')) {
-      return `
-        <svg class="w-full h-24 select-none" viewBox="0 0 400 96" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="400" height="96" fill="#0f172a" rx="12"></rect>
-          <path d="M 0 32 H 400 M 0 64 H 400" stroke="#1e293b" stroke-width="1"></path>
-          
-          <!-- Lamp Housing Body -->
-          <path d="M 40 30 H 160 L 200 68 H 360" stroke="#38bdf8" stroke-width="3" fill="none"></path>
-          
-          <!-- Continuous Hot-Melt Adhesive Bead (1.5mm) -->
-          <path d="M 160 30 H 260" stroke="#10b981" stroke-width="5" stroke-linecap="round"></path>
-          
-          <!-- Sheet Metal Aperture Flange -->
-          <path d="M 150 40 H 270" stroke="#64748b" stroke-width="4"></path>
-          
-          <text x="210" y="20" fill="#34d399" font-family="JetBrains Mono" font-size="8.5" font-weight="700" text-anchor="middle">GLUE BEAD ≥ 1.5mm (AIR INTERLINK 4–6 BAR)</text>
-          <text x="80" y="50" fill="#38bdf8" font-family="JetBrains Mono" font-size="8" font-weight="600">LAMP LENS HOUSING</text>
-          <text x="320" y="80" fill="#94a3b8" font-family="JetBrains Mono" font-size="8" font-weight="600">BODY PANEL MATING</text>
+          <path d="M 0 24 H 400 M 0 48 H 400 M 0 72 H 400" stroke="#1e293b" stroke-width="1"></path>
+          <path d="M 100 0 V 96 M 220 0 V 96 M 320 0 V 96" stroke="#1e293b" stroke-width="1"></path>
+          <path d="M 40 70 H 160 V 32 H 180 V 70 H 360" stroke="#64748b" stroke-width="4" fill="none"></path>
+          <rect x="156" y="30" width="28" height="40" fill="#f59e0b" fill-opacity="0.3" stroke="#f59e0b" stroke-width="1.5"></rect>
+          <line x1="140" y1="32" x2="140" y2="70" stroke="#34d399" stroke-width="1.5"></line>
+          <text x="120" y="52" fill="#34d399" font-family="JetBrains Mono" font-size="8" font-weight="700" text-anchor="end">≥ 37mm</text>
+          <text x="210" y="20" fill="#fbbf24" font-family="JetBrains Mono" font-size="8.5" font-weight="700" text-anchor="middle">WATER BOX STOPPER WEIR (Z-HEIGHT ≥ 37mm)</text>
+          <text x="80" y="84" fill="#94a3b8" font-family="JetBrains Mono" font-size="8" font-weight="600">WATER TROUGH</text>
+          <text x="270" y="84" fill="#38bdf8" font-family="JetBrains Mono" font-size="8" font-weight="600">HVAC AIR INTAKE</text>
         </svg>
       `;
     }
@@ -531,14 +1478,9 @@
         <rect width="400" height="96" fill="#0f172a" rx="12"></rect>
         <path d="M 0 24 H 400 M 0 48 H 400 M 0 72 H 400" stroke="#1e293b" stroke-width="1"></path>
         <path d="M 80 0 V 96 M 200 0 V 96 M 320 0 V 96" stroke="#1e293b" stroke-width="1"></path>
-        
-        <!-- Sheet Metal Joint Lap -->
         <rect x="40" y="38" width="180" height="6" fill="#64748b"></rect>
         <rect x="180" y="44" width="180" height="6" fill="#475569"></rect>
-        
-        <!-- Extruded Body Sealant Joint -->
         <ellipse cx="180" cy="44" rx="18" ry="9" fill="#10b981" stroke="#34d399" stroke-width="1.5"></ellipse>
-        
         <text x="200" y="24" fill="#34d399" font-family="JetBrains Mono" font-size="8.5" font-weight="700" text-anchor="middle">VALIDATED SEAL BARRIER · 360° CONTINUITY</text>
         <text x="100" y="62" fill="#94a3b8" font-family="JetBrains Mono" font-size="8" font-weight="600">BIW OUTER</text>
         <text x="300" y="62" fill="#94a3b8" font-family="JetBrains Mono" font-size="8" font-weight="600">BIW INNER REINFORCEMENT</text>
@@ -546,7 +1488,10 @@
     `;
   }
 
-  // --- 1. LESSONS BROWSER ---
+  // =========================================================================
+  // 4. LESSONS BROWSER ENGINE (Cards & Matrix Table View)
+  // =========================================================================
+
   function setupLessonsBrowser() {
     if (el.lessonSearch) {
       el.lessonSearch.addEventListener('input', e => {
@@ -962,7 +1907,10 @@
     updateKPIDashboard();
   }
 
-  // --- 2. LESSON DETAIL SLIDE-OVER DRAWER ---
+  // =========================================================================
+  // 5. LESSON DETAIL SLIDE-OVER DRAWER
+  // =========================================================================
+
   function setupDetailDrawer() {
     if (el.detailSignoffBtn) {
       el.detailSignoffBtn.addEventListener('click', () => {
@@ -1096,7 +2044,10 @@
     if (el.viewDetail) el.viewDetail.classList.remove('hidden');
   }
 
-  // --- 3. VEHICLE ZONES ---
+  // =========================================================================
+  // 6. VEHICLE ZONES ENGINE (17 Hotspots)
+  // =========================================================================
+
   function setupVehicleZones() {
     el.zonePills.forEach(pill => {
       pill.addEventListener('click', () => {
@@ -1180,7 +2131,10 @@
     };
   }
 
-  // --- 4. LINE CHECKLIST ---
+  // =========================================================================
+  // 7. LINE CHECKLIST ENGINE
+  // =========================================================================
+
   function setupInteractiveChecklist() {
     const checkCards = document.querySelectorAll('#view-interactive-checklist .check-card');
 
@@ -1259,16 +2213,7 @@
       });
     });
 
-    // Severity Selection
-    const sevBtns = document.querySelectorAll('.sev-btn');
-    sevBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        sevBtns.forEach(b => b.classList.remove('ring-2', 'ring-blue-600'));
-        btn.classList.add('ring-2', 'ring-blue-600');
-      });
-    });
-
-    // Barcode Scanner Modal Controls
+    // Barcode scanner simulation modal
     if (el.scanBtn && el.scanModal) {
       el.scanBtn.addEventListener('click', () => el.scanModal.classList.remove('hidden'));
     }
@@ -1278,34 +2223,31 @@
     if (el.simulateScanBtn && el.scanModal) {
       el.simulateScanBtn.addEventListener('click', () => {
         el.scanModal.classList.add('hidden');
-        const vinBadges = document.querySelectorAll('.vin-display-badge');
-        vinBadges.forEach(b => b.textContent = '8XF-90215');
-        showToast('VIN #8XF-90215 scanned and verified for Station 06');
+        showToast('VIN #8XF-90215 Scanned successfully.');
+        document.querySelectorAll('.vin-display-badge').forEach(b => b.textContent = '8XF-90215');
       });
     }
 
-    // Submit Defect Button
+    if (el.completeStationBtn) {
+      el.completeStationBtn.addEventListener('click', () => {
+        showToast('Station 06 Takt Certified: Passed to Water Shower Booth.');
+      });
+    }
+
     if (el.submitDefectBtn) {
       el.submitDefectBtn.addEventListener('click', () => {
         const activeChips = Array.from(document.querySelectorAll('.defect-chip.bg-sky-50')).map(c => c.textContent.trim());
-        const tag = activeChips.length > 0 ? activeChips.join(', ') : 'Water Barrier Ingress Alert';
+        const defectName = activeChips.length > 0 ? activeChips.join(' + ') : 'Sealant line discontinuity detected';
         const newDefect = {
           id: 'DEF-' + Date.now().toString().slice(-4),
-          concern: 'Station 06 Door Assembly: ' + tag,
-          severity: document.querySelector('.sev-btn.ring-2')?.textContent.trim() || 'Serious',
+          concern: defectName,
+          severity: 'Serious',
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         };
         defectLogs.unshift(newDefect);
         saveDefects();
         updateDefectsList();
-        showToast(`Defect #${newDefect.id} logged! Shift QA Lead dispatched.`);
-      });
-    }
-
-    // Complete Station Inspection
-    if (el.completeStationBtn) {
-      el.completeStationBtn.addEventListener('click', () => {
-        showToast('Station 06 Certified! Vehicle cleared for Station 07 Shower Booth.');
+        showToast(`Defect #${newDefect.id} logged to Shift QA Lead.`);
       });
     }
 
@@ -1314,18 +2256,14 @@
 
   function updateChecklistUI() {
     const cards = document.querySelectorAll('#view-interactive-checklist .check-card');
-    let passCount = 0;
-    let failCount = 0;
-    let total = cards.length;
-
+    let completed = 0;
     cards.forEach(card => {
-      const st = card.getAttribute('data-status');
-      if (st === 'pass') passCount++;
-      if (st === 'fail') failCount++;
+      const status = card.getAttribute('data-status');
+      if (status && status !== 'none') completed++;
     });
 
-    const completed = passCount + failCount;
-    const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+    const total = cards.length || 4;
+    const pct = Math.round((completed / total) * 100);
 
     if (el.completedCount) el.completedCount.textContent = completed;
     if (el.percentText) el.percentText.textContent = `(${pct}%)`;
@@ -1335,7 +2273,7 @@
   function updateDefectsList() {
     if (!el.defectLogsList) return;
     if (defectLogs.length === 0) {
-      el.defectLogsList.innerHTML = `<span class="text-xs text-slate-400 italic">No active defect tickets logged on this shift.</span>`;
+      el.defectLogsList.innerHTML = '<span class="text-xs text-slate-400 italic">No open defect tickets for this shift.</span>';
       return;
     }
 
@@ -1351,7 +2289,10 @@
     `).join('');
   }
 
-  // --- 5. DATA SYNC & EXCEL / CSV IMPORT ---
+  // =========================================================================
+  // 8. DATA SYNC & EXCEL / CSV IMPORT ENGINE
+  // =========================================================================
+
   function setupDataSync() {
     if (el.browseBtn && el.fileInput) {
       el.browseBtn.addEventListener('click', () => el.fileInput.click());

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
-  <title>LeakGuard LLR — Water Leak Knowledge &amp; Shopfloor Portal</title>
+  <title>LeakGuard LLR — FTA Root Cause Agent &amp; Water Leak Portal</title>
   
   <style>
     @layer base {
@@ -49,7 +49,7 @@
   <!-- Google Fonts: Inter & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700;800&display=swap" rel="stylesheet"/>
   <!-- Material Symbols Outlined -->
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 
@@ -95,31 +95,36 @@
 <body class="bg-slate-50 dark:bg-[#0b1326] text-slate-900 dark:text-slate-100 font-sans min-h-screen flex flex-col transition-colors duration-200 selection:bg-sky-500 selection:text-white">
 
   <!-- ========================================================================= -->
-  <!-- TOP ENTERPRISE NAVIGATION BAR (FULL WIDTH WIDESCREEN) -->
+  <!-- TOP ENTERPRISE NAVIGATION BAR -->
   <!-- ========================================================================= -->
   <header class="sticky top-0 z-40 w-full bg-white/90 dark:bg-[#0f172a]/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 transition-colors shadow-xs">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-16">
         
         <!-- Left: Brand & Portal Title -->
-        <div class="flex items-center gap-3.5 cursor-pointer" onclick="switchView('lessons-browser')">
-          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-600 to-cyan-500 flex items-center justify-center text-white shadow-md shadow-sky-500/25">
-            <span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1;">water_drop</span>
+        <div class="flex items-center gap-3.5 cursor-pointer" onclick="switchView('fta-agent')">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-sky-500/25">
+            <span class="material-symbols-outlined text-[24px]">account_tree</span>
           </div>
           <div class="flex flex-col">
             <div class="flex items-center gap-2">
               <span class="font-mono text-xs uppercase font-extrabold text-sky-600 dark:text-sky-400 tracking-wider">LeakGuard LLR</span>
-              <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> PLANT 1
+              <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-orange-100 text-orange-800 dark:bg-orange-950/80 dark:text-orange-400 border border-orange-200 dark:border-orange-800">
+                <span class="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span> FTA AGENT
               </span>
             </div>
-            <span class="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white tracking-tight">Water Leak Knowledge &amp; Line Portal</span>
+            <span class="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white tracking-tight">Root Cause Failure Tree &amp; Diagnostic Portal</span>
           </div>
         </div>
 
         <!-- Center: Desktop Navigation Tabs -->
         <nav class="hidden md:flex items-center gap-1 bg-slate-100/80 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-200/80 dark:border-slate-700/80">
-          <button data-nav-tab="lessons-browser" class="nav-tab-btn active px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 bg-white dark:bg-slate-900 text-sky-600 dark:text-sky-400 shadow-xs" type="button">
+          <button data-nav-tab="fta-agent" class="nav-tab-btn active px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 bg-white dark:bg-slate-900 text-sky-600 dark:text-sky-400 shadow-xs" type="button">
+            <span class="material-symbols-outlined text-[18px]">account_tree</span>
+            <span>FTA Root Cause Agent</span>
+            <span class="px-1.5 py-0.2 rounded-full bg-orange-100 text-orange-800 dark:bg-orange-950 dark:text-orange-300 text-[10px] font-mono font-bold">AI</span>
+          </button>
+          <button data-nav-tab="lessons-browser" class="nav-tab-btn px-3.5 py-1.5 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all flex items-center gap-1.5" type="button">
             <span class="material-symbols-outlined text-[18px]">menu_book</span>
             <span>Lessons Hub</span>
             <span id="nav-count-badge" class="ml-0.5 px-1.5 py-0.2 rounded-full bg-sky-100 dark:bg-sky-950 text-[10px] font-mono">76</span>
@@ -146,20 +151,14 @@
             <span class="material-symbols-outlined text-[20px] hidden dark:inline">light_mode</span>
           </button>
 
-          <!-- Shift Selector Badge -->
-          <button aria-label="Shift Selector" class="h-9 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 font-mono text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors flex items-center gap-1.5" type="button">
-            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-            <span>SHIFT A</span>
-          </button>
-
-          <!-- User Profile -->
+          <!-- User Role Badge -->
           <div class="flex items-center gap-2 pl-1 border-l border-slate-200 dark:border-slate-800">
-            <div class="w-9 h-9 rounded-xl bg-sky-600 text-white flex items-center justify-center font-bold text-xs shadow-xs">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-sky-600 to-indigo-600 text-white flex items-center justify-center font-bold text-xs shadow-xs">
               <span class="material-symbols-outlined text-[20px]">engineering</span>
             </div>
             <div class="hidden xl:flex flex-col">
-              <span class="text-xs font-bold text-slate-900 dark:text-white leading-tight">VQE Engineering</span>
-              <span class="text-[10px] text-slate-500 dark:text-slate-400">Trim &amp; Final Line 3</span>
+              <span class="text-xs font-bold text-slate-900 dark:text-white leading-tight">Techline / VQE Lead</span>
+              <span class="text-[10px] text-slate-500 dark:text-slate-400">Diagnosis &amp; Root Cause</span>
             </div>
           </div>
         </div>
@@ -169,81 +168,174 @@
   </header>
 
   <!-- ========================================================================= -->
-  <!-- HERO & TELEMETRY STRIP (KPI DASHBOARD) -->
+  <!-- MAIN WORKSPACE -->
   <!-- ========================================================================= -->
-  <section class="w-full bg-white dark:bg-[#0f172a] border-b border-slate-200 dark:border-slate-800 py-4 transition-colors">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+  <div class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-28 md:pb-12 space-y-6">
+
+    <!-- ======================================================================= -->
+    <!-- VIEW 0: FTA ROOT CAUSE AGENT (PRIMARY VIEW) -->
+    <!-- ======================================================================= -->
+    <div id="view-fta-agent" class="space-y-6">
+
+      <!-- FTA Control Command Center & Scenario Selector -->
+      <div class="bg-white dark:bg-[#0f172a] rounded-3xl p-5 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
         
-        <!-- Metric 1: Total Lessons -->
-        <div class="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0">
-            <span class="material-symbols-outlined text-[22px]">library_books</span>
+        <!-- Header row -->
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-orange-100 text-orange-800 dark:bg-orange-950/80 dark:text-orange-400 border border-orange-200 dark:border-orange-800 flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-orange-500"></span>
+                UptimeAI-Style Root Cause Agent
+              </span>
+              <span class="text-xs text-slate-400 font-mono">Renault-Nissan LLR Spec</span>
+            </div>
+            <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+              Failure Tree Analysis (FTA) Diagnostic Workspace
+            </h1>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              Rapid fault isolation for Service Technicians, Techline Specialists &amp; Quality Analysts. Isolates root causes in minutes instead of hours.
+            </p>
           </div>
-          <div class="min-w-0">
-            <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Total Lessons</span>
-            <div class="flex items-baseline gap-1.5">
-              <span id="kpi-total-lessons" class="text-xl font-extrabold text-slate-900 dark:text-white font-mono">76</span>
-              <span class="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold">100% LLR</span>
+
+          <!-- Scenario Preset Selector Dropdown -->
+          <div class="flex items-center gap-2 w-full md:w-auto">
+            <div class="flex flex-col min-w-[280px]">
+              <label for="fta-scenario-select" class="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider mb-1">
+                Load Diagnostic Case Scenario:
+              </label>
+              <select id="fta-scenario-select" class="h-11 px-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer shadow-xs">
+                <option value="floor-pan-flooding">Case #LK-01: Front Passenger Floor Wet Carpet (PY1B)</option>
+                <option value="door-cavity-speaker">Case #LK-02: Door Pocket Ingress &amp; Speaker Drip (HBC)</option>
+                <option value="headliner-a-pillar">Case #LK-03: Headliner Soak &amp; A-Pillar Drip (RBC)</option>
+                <option value="cowl-bulkhead">Case #LK-04: Cowl Water Box Air Intake Seepage (PB1D)</option>
+                <option value="boot-luggage-well">Case #LK-05: Spare Wheel Well Water Pooling (XBA)</option>
+              </select>
             </div>
           </div>
         </div>
 
-        <!-- Metric 2: Line Verification -->
-        <div class="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-            <span class="material-symbols-outlined text-[22px]">verified</span>
+        <!-- AI Diagnostic Search / Query Input Bar -->
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 pt-2 border-t border-slate-100 dark:border-slate-800">
+          <div class="relative flex-1 flex items-center bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 focus-within:ring-2 focus-within:ring-sky-500 focus-within:border-sky-500 transition-all">
+            <span class="material-symbols-outlined text-slate-400 text-[20px] pl-3.5 pr-2 pointer-events-none">search</span>
+            <input
+              id="fta-query-input"
+              class="w-full h-11 bg-transparent text-slate-900 dark:text-white placeholder:text-slate-400 text-xs sm:text-sm font-medium focus:outline-none pr-16"
+              placeholder="Search or describe symptom: e.g. carpet wet passenger side, foam missing, butyl 70mm, speaker leak..."
+              spellcheck="false"
+              type="text"
+            />
+            <kbd class="hidden sm:inline-flex items-center px-1.5 py-0.5 mr-3 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-[10px] font-mono text-slate-400 select-none">/</kbd>
           </div>
-          <div class="min-w-0 flex-1">
-            <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Line Verified</span>
-            <div class="flex items-baseline gap-1.5">
-              <span id="kpi-verified-count" class="text-xl font-extrabold text-slate-900 dark:text-white font-mono">0</span>
-              <span id="kpi-verified-pct" class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">(0%)</span>
-            </div>
-          </div>
-        </div>
 
-        <!-- Metric 3: Critical Risks -->
-        <div class="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
-            <span class="material-symbols-outlined text-[22px]">warning</span>
-          </div>
-          <div class="min-w-0">
-            <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">High Ingress Risks</span>
-            <div class="flex items-baseline gap-1.5">
-              <span id="kpi-high-risk" class="text-xl font-extrabold text-rose-600 dark:text-rose-400 font-mono">24</span>
-              <span class="text-[11px] text-slate-500 dark:text-slate-400">Cases</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Metric 4: Vehicle Projects -->
-        <div class="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
-            <span class="material-symbols-outlined text-[22px]">minor_crash</span>
-          </div>
-          <div class="min-w-0">
-            <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Vehicle Projects</span>
-            <div class="flex items-baseline gap-1.5">
-              <span class="text-xl font-extrabold text-slate-900 dark:text-white font-mono">7</span>
-              <span class="text-[11px] text-slate-500 dark:text-slate-400 truncate">HBC, PY1B, etc.</span>
-            </div>
+          <div class="flex items-center gap-2">
+            <button id="fta-run-btn" class="h-11 px-4 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-sm transition-all active:scale-95 shrink-0" type="button">
+              <span class="material-symbols-outlined text-[18px]">psychology</span>
+              <span>Run AI Diagnosis</span>
+            </button>
+            <button id="fta-create-wo-btn" class="h-11 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-sm transition-all active:scale-95 shrink-0" type="button">
+              <span class="material-symbols-outlined text-[18px]">assignment_add</span>
+              <span>+ Create Work Order</span>
+            </button>
+            <button id="fta-print-btn" class="h-11 w-11 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 flex items-center justify-center transition-colors shrink-0" title="Print FTA Report" type="button">
+              <span class="material-symbols-outlined text-[18px]">print</span>
+            </button>
           </div>
         </div>
 
       </div>
-    </div>
-  </section>
 
-  <!-- ========================================================================= -->
-  <!-- MAIN CONTENT CONTAINER -->
-  <!-- ========================================================================= -->
-  <div class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-28 md:pb-12">
+      <!-- MIDDLE: Interactive Failure Tree Analysis (FTA) Canvas -->
+      <div class="bg-white dark:bg-[#0f172a] rounded-3xl p-4 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-xs space-y-2">
+        <div class="flex items-center justify-between flex-wrap gap-2 px-2">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-orange-500 text-[20px]">account_tree</span>
+            <span class="text-xs font-mono font-extrabold uppercase tracking-wider text-slate-900 dark:text-white">
+              Interactive Fault Tree Model (Click nodes to inspect or toggle state)
+            </span>
+          </div>
+          <span class="text-[11px] font-mono text-slate-400">
+            Rule-Engine: Renault-Nissan Digital Check (LLR)
+          </span>
+        </div>
+
+        <!-- Visual Tree Canvas (Rendered by app.js) -->
+        <div id="fta-tree-canvas" class="w-full blueprint-grid rounded-2xl border border-slate-200 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 p-2 sm:p-4 overflow-hidden transition-opacity">
+          <!-- Injected dynamically by app.js -->
+        </div>
+      </div>
+
+      <!-- BOTTOM: Two-Column Diagnostic Reasoning & Work Order Workspace (Matching Screenshot) -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        <!-- Left Column (7 Cols): Incident Description & Diagnostic Reasoning Chain -->
+        <div class="lg:col-span-7 bg-white dark:bg-[#0f172a] rounded-3xl p-5 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
+          
+          <!-- Incident Header -->
+          <div class="space-y-2 pb-3 border-b border-slate-100 dark:border-slate-800">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <div class="flex items-center gap-2">
+                <span id="fta-confidence-badge" class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+                  Confidence: High 96%
+                </span>
+                <span class="text-[10px] font-mono font-bold text-slate-400">LLR Precedent Correlated</span>
+              </div>
+              <div class="flex items-center gap-1.5 text-xs">
+                <button class="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors" type="button">Approve</button>
+                <button class="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors" type="button">Revise</button>
+              </div>
+            </div>
+
+            <h2 id="fta-incident-title" class="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white leading-snug">
+              Front Passenger Floor Pan Wetness &amp; Carpet Saturation
+            </h2>
+            <p id="fta-incident-desc" class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+              Sealing screen service hole butyl adhesive gap (&lt;35mm vs 70mm spec) combined with unsealed wire harness clip penetration into inner door dry cavity.
+            </p>
+          </div>
+
+          <!-- Step-by-Step Diagnostic Chain -->
+          <div id="fta-chain-container" class="space-y-3">
+            <!-- Injected dynamically by app.js -->
+          </div>
+
+        </div>
+
+        <!-- Right Column (5 Cols): Tabbed Management Panel (Recommendations, Work Orders, Documents, System) -->
+        <div class="lg:col-span-5 bg-white dark:bg-[#0f172a] rounded-3xl p-5 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
+          
+          <!-- Tabs Navigation -->
+          <div class="flex items-center p-1 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 overflow-x-auto no-scrollbar">
+            <button class="fta-tab-btn active px-3 py-1.5 rounded-lg text-xs font-bold bg-white dark:bg-slate-800 text-sky-600 dark:text-sky-400 shadow-xs transition-all shrink-0" data-fta-tab="recommendations" type="button">
+              Recommendations
+            </button>
+            <button class="fta-tab-btn px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-all shrink-0" data-fta-tab="workorders" type="button">
+              Work Orders
+            </button>
+            <button class="fta-tab-btn px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-all shrink-0" data-fta-tab="documents" type="button">
+              LLR Evidence
+            </button>
+            <button class="fta-tab-btn px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-all shrink-0" data-fta-tab="system" type="button">
+              System Details
+            </button>
+          </div>
+
+          <!-- Tab Content Display -->
+          <div id="fta-tab-content" class="min-h-[280px]">
+            <!-- Injected dynamically by app.js -->
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
 
     <!-- ======================================================================= -->
     <!-- VIEW 1: LESSONS BROWSER (lessons-browser) -->
     <!-- ======================================================================= -->
-    <div id="view-lessons-browser" class="space-y-6">
+    <div id="view-lessons-browser" class="hidden space-y-6">
       
       <!-- Search, Filters, and View Control Toolbar -->
       <div class="bg-white dark:bg-[#0f172a] rounded-2xl p-4 sm:p-5 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
@@ -261,7 +353,6 @@
               type="text"
             />
             <div class="absolute right-1.5 flex items-center gap-1.5">
-              <kbd class="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-[10px] font-mono text-slate-400 select-none">/</kbd>
               <button id="clear-search-btn" aria-label="Clear Search Input" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hidden transition-colors" type="button">
                 <span class="material-symbols-outlined text-[18px]">close</span>
               </button>
@@ -363,11 +454,8 @@
         <!-- SVG Car Chassis Hotspots Canvas -->
         <div class="w-full h-48 sm:h-56 blueprint-grid bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200 dark:border-slate-800 relative flex items-center justify-center p-2 overflow-x-auto">
           <svg class="w-[520px] h-[140px] shrink-0 select-none" fill="none" viewBox="0 0 520 140" xmlns="http://www.w3.org/2000/svg">
-            <!-- Modern Automobile Body Outline -->
             <path d="M 40 90 L 70 90 L 95 62 L 175 48 L 275 48 L 360 55 L 420 85 L 480 88 C 488 88 492 95 488 102 L 475 110 L 40 110 Z" fill="#e2e8f0" class="dark:fill-slate-800/80" stroke="#94a3b8" stroke-width="2"></path>
-            <!-- Windows & Pillar Lines -->
             <path d="M 100 62 L 170 52 L 270 52 L 355 58 L 410 85" stroke="#64748b" stroke-width="2" stroke-dasharray="4 4"></path>
-            <!-- Wheels -->
             <circle cx="110" cy="110" fill="#cbd5e1" class="dark:fill-slate-700" r="16" stroke="#64748b" stroke-width="3"></circle>
             <circle cx="410" cy="110" fill="#cbd5e1" class="dark:fill-slate-700" r="16" stroke="#64748b" stroke-width="3"></circle>
 
@@ -395,7 +483,7 @@
               <text fill="#ffffff" font-family="Inter" font-size="8" font-weight="700" text-anchor="middle" x="0" y="-11">ROOF</text>
             </g>
 
-            <!-- Hotspot 4: Doors (Critical Red) -->
+            <!-- Hotspot 4: Doors -->
             <g class="cursor-pointer zone-hotspot transition-transform duration-200 hover:scale-125" data-target="doors" transform="translate(245, 80)">
               <circle cx="0" cy="0" fill="#ef4444" fill-opacity="0.3" r="16" class="animate-pulse"></circle>
               <circle cx="0" cy="0" fill="#dc2626" r="8"></circle>
@@ -411,7 +499,7 @@
               <text fill="#ffffff" font-family="Inter" font-size="8" font-weight="700" text-anchor="middle" x="0" y="-11">C-PILLAR</text>
             </g>
 
-            <!-- Hotspot 6: Liftgate / Tailgate -->
+            <!-- Hotspot 6: Liftgate -->
             <g class="cursor-pointer zone-hotspot transition-transform duration-200 hover:scale-125" data-target="tailgate" transform="translate(410, 70)">
               <circle cx="0" cy="0" fill="#f59e0b" fill-opacity="0.25" r="14"></circle>
               <circle cx="0" cy="0" fill="#d97706" r="7"></circle>
@@ -429,7 +517,7 @@
           </svg>
         </div>
 
-        <!-- Filter pills under schematic -->
+        <!-- Filter pills -->
         <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pt-2">
           <button class="filter-pill active shrink-0 h-9 px-4 rounded-xl bg-blue-600 text-white text-xs font-bold transition-all" data-filter="all" type="button">
             All 17 Areas
@@ -454,7 +542,7 @@
 
       <!-- Zone Cards Grid -->
       <div id="zones-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        <!-- Rendered by app.js with rich SVG icons and lesson links -->
+        <!-- Rendered by app.js -->
       </div>
 
     </div>
@@ -526,7 +614,7 @@
         </div>
       </div>
 
-      <!-- Checklist Items Grid (Glove-Tap Touch Targets) -->
+      <!-- Checklist Items Grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
         
         <!-- Check Card 1 -->
@@ -662,7 +750,6 @@
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <!-- Tags -->
           <div>
             <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">Failure Symptom Tag</span>
             <div class="grid grid-cols-2 gap-2">
@@ -681,20 +768,13 @@
             </div>
           </div>
 
-          <!-- Severity & Submit -->
           <div class="flex flex-col justify-between">
             <div>
               <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">Severity Level</span>
               <div class="grid grid-cols-3 gap-2">
-                <button class="sev-btn py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all" type="button">
-                  Minor
-                </button>
-                <button class="sev-btn ring-2 ring-blue-600 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all" type="button">
-                  Serious
-                </button>
-                <button class="sev-btn py-2 rounded-xl border border-rose-200 bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400 text-xs font-bold transition-all" type="button">
-                  Line Stop
-                </button>
+                <button class="sev-btn py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all" type="button">Minor</button>
+                <button class="sev-btn ring-2 ring-blue-600 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all" type="button">Serious</button>
+                <button class="sev-btn py-2 rounded-xl border border-rose-200 bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400 text-xs font-bold transition-all" type="button">Line Stop</button>
               </div>
             </div>
 
@@ -709,7 +789,6 @@
         </div>
       </div>
 
-      <!-- Complete Station Action -->
       <div class="flex items-center justify-between gap-4 pt-2">
         <button id="completeStationBtn" class="flex-1 min-h-[56px] rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-base tracking-wide flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 transition-all active:scale-98" type="button">
           <span class="material-symbols-outlined text-[24px]">verified</span> Complete Station Inspection (OK)
@@ -723,7 +802,6 @@
     <!-- ======================================================================= -->
     <div id="view-data-sync" class="hidden space-y-6">
       
-      <!-- Upload & Sync Hero Card -->
       <div class="bg-white dark:bg-[#0f172a] rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-xs space-y-6">
         <div class="flex items-center justify-between flex-wrap gap-3">
           <div>
@@ -775,40 +853,6 @@
           </div>
         </div>
 
-        <!-- Column Auto-Mapping Status -->
-        <div class="space-y-3 pt-2">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">Auto-Mapped Schema Columns</span>
-            <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">5 of 5 Core Columns Connected</span>
-          </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 text-xs">
-            <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
-              <span class="font-medium text-slate-700 dark:text-slate-300">Slide / S.No</span>
-              <span class="text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-0.5"><span class="material-symbols-outlined text-[15px]">check</span> Mapped</span>
-            </div>
-            <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
-              <span class="font-medium text-slate-700 dark:text-slate-300">Area / Category (17 Zones)</span>
-              <span class="text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-0.5"><span class="material-symbols-outlined text-[15px]">check</span> Mapped</span>
-            </div>
-            <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
-              <span class="font-medium text-slate-700 dark:text-slate-300">Root Cause 1-3</span>
-              <span class="text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-0.5"><span class="material-symbols-outlined text-[15px]">check</span> Mapped</span>
-            </div>
-            <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
-              <span class="font-medium text-slate-700 dark:text-slate-300">Countermeasures 1-3</span>
-              <span class="text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-0.5"><span class="material-symbols-outlined text-[15px]">check</span> Mapped</span>
-            </div>
-            <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
-              <span class="font-medium text-slate-700 dark:text-slate-300">Check Points 1-4</span>
-              <span class="text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-0.5"><span class="material-symbols-outlined text-[15px]">check</span> Mapped</span>
-            </div>
-            <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
-              <span class="font-medium text-slate-700 dark:text-slate-300">Project / DocRef</span>
-              <span class="text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-0.5"><span class="material-symbols-outlined text-[15px]">check</span> Mapped</span>
-            </div>
-          </div>
-        </div>
-
         <!-- Sync Actions -->
         <div class="pt-4 flex flex-col sm:flex-row items-center gap-3">
           <button id="sync-now-btn" class="w-full sm:flex-1 h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-md transition-all active:scale-95" type="button">
@@ -826,16 +870,107 @@
   </div>
 
   <!-- ========================================================================= -->
+  <!-- CREATE WORK ORDER NOTIFICATION MODAL (MATCHING SCREENSHOT) -->
+  <!-- ========================================================================= -->
+  <div id="workOrderModal" class="hidden fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm overflow-y-auto p-4 flex items-center justify-center">
+    <div class="bg-white dark:bg-[#0f172a] rounded-3xl w-full max-w-xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden my-auto flex flex-col">
+      
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+        <div>
+          <h3 class="text-base font-extrabold text-slate-900 dark:text-white">Create a Work Order Notification</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Create a work order notification for this recommendations</p>
+        </div>
+        <button id="closeWoModal" class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-colors" type="button">
+          <span class="material-symbols-outlined text-[18px]">close</span>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-6 space-y-4 text-xs">
+        
+        <!-- Description -->
+        <div>
+          <label for="wo-desc" class="block font-bold text-slate-700 dark:text-slate-300 mb-1.5">Description</label>
+          <textarea
+            id="wo-desc"
+            rows="3"
+            class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none"
+            placeholder="Laser align pump / re-route butyl bead to 70mm..."
+          ></textarea>
+        </div>
+
+        <!-- Priority & Due Date Row -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label for="wo-priority" class="block font-bold text-slate-700 dark:text-slate-300 mb-1.5">Priority</label>
+            <select id="wo-priority" class="w-full h-11 px-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs font-bold focus:ring-2 focus:ring-sky-500">
+              <option value="High" selected>High</option>
+              <option value="Critical">Critical (Line Stop)</option>
+              <option value="Medium">Medium</option>
+              <option value="Low">Low</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="wo-due-date" class="block font-bold text-slate-700 dark:text-slate-300 mb-1.5">Due Date</label>
+            <input
+              id="wo-due-date"
+              type="date"
+              class="w-full h-11 px-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs font-bold focus:ring-2 focus:ring-sky-500"
+            />
+          </div>
+        </div>
+
+        <!-- Assigned To & Estimated Hours Row -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label for="wo-assignee" class="block font-bold text-slate-700 dark:text-slate-300 mb-1.5">Assigned To</label>
+            <select id="wo-assignee" class="w-full h-11 px-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs font-bold focus:ring-2 focus:ring-sky-500">
+              <option value="Nikit (Techline Specialist)" selected>Nikit (Techline Specialist)</option>
+              <option value="Sree Vishnu (VQE Lead)">Sree Vishnu (VQE Lead)</option>
+              <option value="Damodharan (Analyst)">Damodharan (Analyst)</option>
+              <option value="J. Ramirez (Trim Station 06)">J. Ramirez (Trim Station 06)</option>
+              <option value="A. Patel (Quality Lead)">A. Patel (Quality Lead)</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="wo-hours" class="block font-bold text-slate-700 dark:text-slate-300 mb-1.5">Estimated Hours</label>
+            <input
+              id="wo-hours"
+              type="number"
+              step="0.5"
+              value="1.5"
+              placeholder="Enter hours"
+              class="w-full h-11 px-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs font-bold focus:ring-2 focus:ring-sky-500"
+            />
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer (Matching Screenshot) -->
+      <div class="px-6 py-4 bg-slate-50 dark:bg-slate-900/80 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-3">
+        <button id="cancelWoBtn" class="h-10 px-5 rounded-xl border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" type="button">
+          Cancel
+        </button>
+        <button id="confirmWoBtn" class="h-10 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-md active:scale-95 transition-all" type="button">
+          <span class="material-symbols-outlined text-[16px]">check</span> Confirm
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
   <!-- LESSON DETAIL SLIDE-OVER DRAWER (view-lesson-detail) -->
   <!-- ========================================================================= -->
   <div id="view-lesson-detail" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm overflow-hidden flex justify-end">
-    <!-- Click backdrop to close -->
     <div class="fixed inset-0 transition-opacity" onclick="if (event.target === this) document.getElementById('view-lesson-detail').classList.add('hidden');"></div>
 
-    <!-- Slide-over Drawer Panel -->
     <div class="relative w-full max-w-2xl bg-white dark:bg-[#0f172a] h-full shadow-2xl border-l border-slate-200 dark:border-slate-800 flex flex-col z-10 transition-transform duration-300">
       
-      <!-- Drawer Header -->
       <div class="px-6 py-4 bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
         <div class="flex items-center gap-2">
           <span id="detail-slide-num" class="font-mono text-xs font-bold text-sky-700 bg-sky-50 dark:bg-sky-950/60 dark:text-sky-300 border border-sky-200 dark:border-sky-800 px-2.5 py-1 rounded-lg">
@@ -858,10 +993,7 @@
         </div>
       </div>
 
-      <!-- Drawer Body (Scrollable) -->
       <div class="p-6 space-y-5 overflow-y-auto flex-1">
-        
-        <!-- Meta & Title -->
         <div>
           <div class="flex items-center gap-2 mb-1.5 flex-wrap">
             <span id="detail-risk-badge" class="px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-400 border border-rose-200 dark:border-rose-800">
@@ -880,7 +1012,6 @@
           </h2>
         </div>
 
-        <!-- Technical CAD Schematic -->
         <div class="space-y-1.5">
           <div class="flex items-center justify-between text-[11px] font-mono text-slate-400">
             <span class="flex items-center gap-1 font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400">
@@ -893,10 +1024,7 @@
           </div>
         </div>
 
-        <!-- 3 Structured Cards -->
         <div class="space-y-3.5">
-          
-          <!-- 1. What Went Wrong -->
           <div class="rounded-2xl p-4 bg-rose-50/70 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/60 space-y-2">
             <div class="flex items-center gap-2 text-rose-700 dark:text-rose-400 font-bold text-xs uppercase tracking-wide">
               <span class="material-symbols-outlined text-[18px]">error</span>
@@ -907,7 +1035,6 @@
             </div>
           </div>
 
-          <!-- 2. How It Was Fixed -->
           <div class="rounded-2xl p-4 bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/60 space-y-2">
             <div class="flex items-center gap-2 text-emerald-700 dark:text-emerald-400 font-bold text-xs uppercase tracking-wide">
               <span class="material-symbols-outlined text-[18px]">verified</span>
@@ -918,7 +1045,6 @@
             </div>
           </div>
 
-          <!-- 3. Line Inspection Standard -->
           <div class="rounded-2xl p-4 bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/60 space-y-3">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2 text-amber-800 dark:text-amber-400 font-bold text-xs uppercase tracking-wide">
@@ -931,11 +1057,9 @@
               <!-- Check items generated by app.js -->
             </div>
           </div>
-
         </div>
       </div>
 
-      <!-- Drawer Sticky Action Footer -->
       <div class="px-6 py-4 bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 shrink-0">
         <button id="detail-defect-btn" class="h-11 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 transition-all active:scale-95 shadow-xs" type="button">
           <span class="material-symbols-outlined text-[18px]">flag</span> Flag Defect
@@ -949,11 +1073,15 @@
   </div>
 
   <!-- ========================================================================= -->
-  <!-- MOBILE BOTTOM NAVIGATION (SUB-768PX ONLY) -->
+  <!-- MOBILE BOTTOM NAVIGATION -->
   <!-- ========================================================================= -->
   <nav data-shell-nav class="md:hidden fixed bottom-0 w-full z-30 bg-white/95 dark:bg-[#0f172a]/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 shadow-lg">
     <div class="flex justify-around items-center h-16 px-2">
-      <button data-path="lessons-browser" class="mobile-nav-btn active flex flex-col items-center justify-center flex-1 py-1 text-sky-600 dark:text-sky-400 font-bold" type="button">
+      <button data-path="fta-agent" class="mobile-nav-btn active flex flex-col items-center justify-center flex-1 py-1 text-sky-600 dark:text-sky-400 font-bold" type="button">
+        <span class="material-symbols-outlined text-[22px]">account_tree</span>
+        <span class="text-[10px] mt-0.5">FTA Agent</span>
+      </button>
+      <button data-path="lessons-browser" class="mobile-nav-btn flex flex-col items-center justify-center flex-1 py-1 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white" type="button">
         <span class="material-symbols-outlined text-[22px]">menu_book</span>
         <span class="text-[10px] mt-0.5">Lessons</span>
       </button>
@@ -973,7 +1101,7 @@
   </nav>
 
   <!-- ========================================================================= -->
-  <!-- BARCODE SCANNER MODAL SIMULATION -->
+  <!-- BARCODE SCANNER MODAL -->
   <!-- ========================================================================= -->
   <div id="scanModal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm p-4 flex items-center justify-center">
     <div class="bg-white dark:bg-[#0f172a] rounded-3xl w-full max-w-sm p-5 space-y-4 shadow-2xl border border-slate-200 dark:border-slate-800">
