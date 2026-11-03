@@ -1,5 +1,8 @@
 # 🛡️ LeakGuard LLR — FTA Root Cause Agent & Diagnostic Portal
 
+[![Framework: Next.js 14 / React 18](https://img.shields.io/badge/Framework-Next.js%2014%20%2F%20React%2018-black.svg)](#)
+[![TypeScript: 5.4](https://img.shields.io/badge/TypeScript-5.4-blue.svg)](#)
+[![Tailwind CSS: 3.4](https://img.shields.io/badge/Tailwind%20CSS-3.4-38bdf8.svg)](#)
 [![Project Status: Active](https://img.shields.io/badge/Status-Production%20Ready-emerald.svg)](#)
 [![FTA Engine: Active](https://img.shields.io/badge/Engine-Failure%20Tree%20Analysis%20(FTA)-orange.svg)](#)
 [![Dataset: 76 LLR Lessons](https://img.shields.io/badge/Dataset-76%20Standard%20Lessons-blue.svg)](#)
@@ -214,25 +217,28 @@ The portal data is organized directly from [Water_Leak_Issues_and_Check_Points.c
 - Node.js (v18+ recommended, tested on v24) **OR** Python (3.x)
 - Any modern web browser (Chrome, Edge, Firefox, Safari)
 
-### Method 1: Start with Node.js Server (Recommended)
+### Method 1: Start Next.js Development Server (Recommended)
 ```powershell
 # Navigate to the project directory
 cd c:\Users\devas\projects\root
 
-# Start the local server
-npm start
+# Run Next.js 14 hot-reloading development server
+npm run dev
 ```
 Open your browser to: **`http://localhost:3000`**
 
-### Method 2: Start with Python HTTP Server
+### Method 2: Build and Run Production Next.js Bundle
 ```powershell
-python -m http.server 3000
-```
-Open your browser to: **`http://localhost:3000`**
+# Compile optimized production build
+npm run build
 
-### Method 3: Direct File Open (Offline Standalone)
-Because `lessons-data.js` is bundled locally with no CORS dependencies:
-- Simply double-click `index.html` or open `file:///c:/Users/devas/projects/root/index.html` directly in Edge or Chrome. All 76 lessons load immediately.
+# Start production server
+npm run start
+```
+
+### Method 3: Direct File Open (Offline Standalone Fallback)
+Because `index.html` and `lessons-data.js` are preserved locally with zero CORS dependencies:
+- Double-click `index.html` or open `file:///c:/Users/devas/projects/root/index.html` directly in Edge or Chrome. All 76 lessons load immediately offline. Or run `npm run serve:vanilla` for the lightweight Node static server.
 
 ---
 
