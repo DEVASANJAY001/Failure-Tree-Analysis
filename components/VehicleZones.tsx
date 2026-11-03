@@ -40,67 +40,66 @@ export default function VehicleZones({ onSelectZone }: VehicleZonesProps) {
   return (
     <div className="space-y-6">
       {/* Top Banner */}
-      <div className="bg-white dark:bg-[#0f172a] rounded-3xl p-6 lg:p-8 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="bg-white dark:bg-[#111827] rounded-2xl p-6 border border-slate-200/80 dark:border-slate-800 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-sky-500 animate-pulse"></span>
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="w-2 h-2 rounded-full bg-sky-500"></span>
             <span className="text-xs font-mono font-bold tracking-wider text-sky-600 dark:text-sky-400 uppercase">
-              Chassis Hotspot Topology
+              Chassis Ingress Topology
             </span>
           </div>
-          <h2 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
-            17 Vehicle Ingress Critical Zones
+          <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+            17 Critical Vehicle Ingress Zones
           </h2>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 max-w-2xl">
-            Click on any chassis target or zone card below to filter the 76 LLR engineering lessons, check points, and standard countermeasures.
+          <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm mt-1 max-w-2xl leading-relaxed">
+            Click on any chassis target or zone card below to inspect the 76 historical digital check lessons and engineering standards.
           </p>
         </div>
 
-        <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-900/60 p-2 rounded-2xl border border-slate-200 dark:border-slate-800 text-xs font-mono">
-          <div className="text-center px-3 py-1.5 border-r border-slate-200 dark:border-slate-800">
-            <div className="font-bold text-slate-900 dark:text-white text-base">17</div>
-            <div className="text-[10px] text-slate-500 uppercase">Total Zones</div>
+        <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-900 p-2 rounded-xl border border-slate-200/80 dark:border-slate-800 text-xs font-mono">
+          <div className="text-center px-3 py-1 border-r border-slate-200 dark:border-slate-800">
+            <div className="font-bold text-slate-900 dark:text-white text-sm">17</div>
+            <div className="text-[10px] text-slate-400 uppercase">Zones</div>
           </div>
-          <div className="text-center px-3 py-1.5 border-r border-slate-200 dark:border-slate-800">
-            <div className="font-bold text-rose-600 dark:text-rose-400 text-base">7</div>
-            <div className="text-[10px] text-slate-500 uppercase">High Risk</div>
+          <div className="text-center px-3 py-1 border-r border-slate-200 dark:border-slate-800">
+            <div className="font-bold text-rose-600 dark:text-rose-400 text-sm">7</div>
+            <div className="text-[10px] text-slate-400 uppercase">High Risk</div>
           </div>
-          <div className="text-center px-3 py-1.5">
-            <div className="font-bold text-sky-600 dark:text-sky-400 text-base">76</div>
-            <div className="text-[10px] text-slate-500 uppercase">Total Lessons</div>
+          <div className="text-center px-3 py-1">
+            <div className="font-bold text-sky-600 dark:text-sky-400 text-sm">76</div>
+            <div className="text-[10px] text-slate-400 uppercase">Lessons</div>
           </div>
         </div>
       </div>
 
       {/* Interactive Chassis Blueprint */}
-      <div className="bg-slate-900 rounded-3xl p-6 border border-slate-800 shadow-md relative overflow-hidden text-white">
+      <div className="bg-slate-950 rounded-2xl p-6 border border-slate-800/80 shadow-md relative overflow-hidden text-white">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-sky-400 text-lg">directions_car</span>
             <span className="text-xs font-mono font-bold text-slate-300 uppercase tracking-wider">
-              Interactive BIW Water Ingress Hotspots
+              BIW Water Ingress Hotspots
             </span>
           </div>
-          <span className="text-[11px] font-mono text-slate-400 bg-slate-800/80 px-2.5 py-1 rounded-full border border-slate-700">
+          <span className="text-[11px] font-mono text-slate-400 bg-slate-900 px-2.5 py-0.5 rounded-full border border-slate-800">
             Click hotspot to view lessons
           </span>
         </div>
 
         {/* Vector SVG Silhouette & Hotspots */}
-        <div className="w-full h-56 md:h-64 flex items-center justify-center relative">
+        <div className="w-full h-52 md:h-60 flex items-center justify-center relative">
           <svg
             viewBox="0 0 740 220"
             className="w-full h-full max-w-3xl"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
           >
-            {/* Grid Pattern */}
             <defs>
               <pattern id="chassisGrid" width="20" height="20" patternUnits="userSpaceOnUse">
-                <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#1e293b" strokeWidth="0.75" />
+                <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#172033" strokeWidth="0.75" />
               </pattern>
             </defs>
-            <rect width="740" height="220" fill="url(#chassisGrid)" rx="16" />
+            <rect width="740" height="220" fill="url(#chassisGrid)" rx="14" />
 
             {/* Vehicle Silhouette Outline */}
             <path
@@ -119,9 +118,9 @@ export default function VehicleZones({ onSelectZone }: VehicleZonesProps) {
                  L 140 105 
                  C 120 108 115 120 115 140 
                  Z"
-              fill="#0f172a"
+              fill="#0b1329"
               stroke="#38bdf8"
-              strokeWidth="2.5"
+              strokeWidth="2"
               strokeLinejoin="round"
             />
 
@@ -129,23 +128,23 @@ export default function VehicleZones({ onSelectZone }: VehicleZonesProps) {
             <path
               d="M 235 98 L 315 63 L 530 63 L 610 72 L 640 98 Z"
               fill="#0284c7"
-              fillOpacity="0.15"
-              stroke="#0ea5e9"
-              strokeWidth="1.5"
+              fillOpacity="0.12"
+              stroke="#0284c7"
+              strokeWidth="1.25"
             />
             {/* A/B/C Pillars */}
-            <line x1="320" y1="63" x2="310" y2="98" stroke="#38bdf8" strokeWidth="2" strokeDasharray="3 3" />
-            <line x1="430" y1="63" x2="430" y2="155" stroke="#38bdf8" strokeWidth="2" />
-            <line x1="535" y1="63" x2="550" y2="98" stroke="#38bdf8" strokeWidth="2" strokeDasharray="3 3" />
+            <line x1="320" y1="63" x2="310" y2="98" stroke="#38bdf8" strokeWidth="1.5" strokeDasharray="3 3" />
+            <line x1="430" y1="63" x2="430" y2="155" stroke="#38bdf8" strokeWidth="1.5" />
+            <line x1="535" y1="63" x2="550" y2="98" stroke="#38bdf8" strokeWidth="1.5" strokeDasharray="3 3" />
 
             {/* Wheels */}
-            <circle cx="190" cy="160" r="30" fill="#1e293b" stroke="#64748b" strokeWidth="3" />
-            <circle cx="190" cy="160" r="14" fill="#0f172a" stroke="#94a3b8" strokeWidth="2" />
-            <circle cx="530" cy="160" r="30" fill="#1e293b" stroke="#64748b" strokeWidth="3" />
-            <circle cx="530" cy="160" r="14" fill="#0f172a" stroke="#94a3b8" strokeWidth="2" />
+            <circle cx="190" cy="160" r="28" fill="#111827" stroke="#475569" strokeWidth="2.5" />
+            <circle cx="190" cy="160" r="12" fill="#070d1e" stroke="#64748b" strokeWidth="1.5" />
+            <circle cx="530" cy="160" r="28" fill="#111827" stroke="#475569" strokeWidth="2.5" />
+            <circle cx="530" cy="160" r="12" fill="#070d1e" stroke="#64748b" strokeWidth="1.5" />
 
             {/* Ground line */}
-            <line x1="80" y1="190" x2="680" y2="190" stroke="#334155" strokeWidth="1.5" strokeDasharray="6 4" />
+            <line x1="80" y1="190" x2="680" y2="190" stroke="#1e293b" strokeWidth="1" strokeDasharray="6 4" />
 
             {/* Hotspots */}
             {hotspots.map(h => {
@@ -158,29 +157,20 @@ export default function VehicleZones({ onSelectZone }: VehicleZonesProps) {
                   onMouseEnter={() => setHoveredHotspot(h.id)}
                   onMouseLeave={() => setHoveredHotspot(null)}
                 >
-                  {/* Outer pulse */}
                   <circle
                     cx={h.cx}
                     cy={h.cy}
-                    r={isHovered ? 18 : 12}
-                    className="transition-all duration-200 fill-sky-500/30 group-hover:fill-sky-400/40 animate-ping"
+                    r={isHovered ? 14 : 9}
+                    className="transition-all duration-200 fill-sky-400 stroke-white stroke-2"
                   />
-                  {/* Mid circle */}
-                  <circle
-                    cx={h.cx}
-                    cy={h.cy}
-                    r={isHovered ? 12 : 8}
-                    className="transition-all duration-200 fill-sky-500 stroke-white stroke-2 group-hover:scale-125"
-                  />
-                  {/* Tooltip Label */}
                   <text
                     x={h.cx}
-                    y={h.cy - 16}
+                    y={h.cy - 14}
                     textAnchor="middle"
-                    fill={isHovered ? '#38bdf8' : '#e2e8f0'}
-                    fontSize="10"
+                    fill={isHovered ? '#38bdf8' : '#cbd5e1'}
+                    fontSize="9.5"
                     fontFamily="monospace"
-                    fontWeight="bold"
+                    fontWeight="600"
                     className="pointer-events-none drop-shadow"
                   >
                     {h.label}
@@ -193,19 +183,19 @@ export default function VehicleZones({ onSelectZone }: VehicleZonesProps) {
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
         {filterTabs.map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveFilter(tab.id as any)}
-            className={`px-4 py-2 rounded-2xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-2 border ${
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap flex items-center gap-1.5 border ${
               activeFilter === tab.id
-                ? 'bg-slate-900 text-white border-slate-900 dark:bg-white dark:text-slate-900 dark:border-white shadow-xs'
-                : 'bg-white dark:bg-[#0f172a] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:border-slate-300'
+                ? 'bg-slate-900 text-white border-slate-900 dark:bg-white dark:text-slate-900 dark:border-white shadow-xs font-bold'
+                : 'bg-white dark:bg-[#111827] text-slate-600 dark:text-slate-400 border-slate-200/80 dark:border-slate-800 hover:border-slate-300'
             }`}
           >
             <span>{tab.label}</span>
-            <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-mono ${
+            <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${
               activeFilter === tab.id
                 ? 'bg-white/20 text-white dark:bg-slate-900/20 dark:text-slate-900'
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
@@ -221,38 +211,38 @@ export default function VehicleZones({ onSelectZone }: VehicleZonesProps) {
         {filteredZones.map((z: ZoneItem) => (
           <article
             key={z.id}
-            className="bg-white dark:bg-[#0f172a] rounded-3xl p-5 border border-slate-200 dark:border-slate-800 shadow-xs hover:shadow-md transition-all flex flex-col justify-between gap-4 group hover:border-sky-300 dark:hover:border-sky-800"
+            className="bg-white dark:bg-[#111827] rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between gap-4 group"
           >
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-2xl bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 flex items-center justify-center border border-sky-100 dark:border-sky-900 group-hover:scale-105 transition-transform">
-                  <span className="material-symbols-outlined text-[26px]">{z.icon}</span>
+                <div className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center border border-slate-200/60 dark:border-slate-700/60">
+                  <span className="material-symbols-outlined text-[22px]">{z.icon}</span>
                 </div>
-                <span className="text-xs font-mono font-bold text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-950/60 px-2.5 py-1 rounded-full border border-sky-200 dark:border-sky-800">
+                <span className="text-[11px] font-mono font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md">
                   {z.count} Lessons
                 </span>
               </div>
 
               <div>
-                <h3 className="text-base font-extrabold text-slate-900 dark:text-white group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
                   {z.name}
                 </h3>
-                <span className="text-xs text-slate-400 font-medium">{z.station}</span>
+                <span className="text-[11px] text-slate-400 font-medium">{z.station}</span>
               </div>
 
-              <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-xs text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                <span className="material-symbols-outlined text-[16px] text-amber-500 shrink-0">warning</span>
-                <span className="truncate font-medium">{z.risk}</span>
+              <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-300 flex items-center gap-2">
+                <span className="material-symbols-outlined text-[15px] text-amber-500 shrink-0">warning</span>
+                <span className="truncate text-[11px] font-medium">{z.risk}</span>
               </div>
             </div>
 
             <button
               onClick={() => onSelectZone(z.name)}
-              className="w-full h-10 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-sky-600 dark:hover:bg-sky-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-xs"
+              className="w-full h-9 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-sky-600 dark:hover:bg-sky-500 text-white font-semibold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-xs"
               type="button"
             >
               <span>Open Lessons ({z.count})</span>
-              <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+              <span className="material-symbols-outlined text-[15px]">arrow_forward</span>
             </button>
           </article>
         ))}
@@ -260,4 +250,3 @@ export default function VehicleZones({ onSelectZone }: VehicleZonesProps) {
     </div>
   );
 }
-

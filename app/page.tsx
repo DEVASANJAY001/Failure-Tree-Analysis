@@ -198,43 +198,43 @@ export default function Home() {
         
         {/* KPI Strip */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-          <div className="bg-white dark:bg-[#0f172a] rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-xs flex items-center justify-between">
+          <div className="bg-white dark:bg-[#111827] rounded-xl p-4 border border-slate-200/80 dark:border-slate-800 shadow-xs flex items-center justify-between">
             <div>
               <div className="text-[11px] font-mono text-slate-400 uppercase tracking-wider">Lessons Total</div>
-              <div className="text-2xl font-black text-slate-900 dark:text-white mt-0.5">{lessons.length}</div>
+              <div className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mt-0.5">{lessons.length}</div>
             </div>
-            <div className="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 flex items-center justify-center">
-              <span className="material-symbols-outlined text-xl">menu_book</span>
+            <div className="w-9 h-9 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center">
+              <span className="material-symbols-outlined text-[19px]">menu_book</span>
             </div>
           </div>
 
-          <div className="bg-white dark:bg-[#0f172a] rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-xs flex items-center justify-between">
+          <div className="bg-white dark:bg-[#111827] rounded-xl p-4 border border-slate-200/80 dark:border-slate-800 shadow-xs flex items-center justify-between">
             <div>
               <div className="text-[11px] font-mono text-slate-400 uppercase tracking-wider">Critical Zones</div>
-              <div className="text-2xl font-black text-slate-900 dark:text-white mt-0.5">17</div>
+              <div className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mt-0.5">17</div>
             </div>
-            <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
-              <span className="material-symbols-outlined text-xl">hub</span>
+            <div className="w-9 h-9 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center">
+              <span className="material-symbols-outlined text-[19px]">hub</span>
             </div>
           </div>
 
-          <div className="bg-white dark:bg-[#0f172a] rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-xs flex items-center justify-between">
+          <div className="bg-white dark:bg-[#111827] rounded-xl p-4 border border-slate-200/80 dark:border-slate-800 shadow-xs flex items-center justify-between">
             <div>
               <div className="text-[11px] font-mono text-slate-400 uppercase tracking-wider">Verified Slides</div>
-              <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-0.5">{verifiedSlides.size}</div>
+              <div className="text-xl sm:text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">{verifiedSlides.size}</div>
             </div>
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-              <span className="material-symbols-outlined text-xl">verified</span>
+            <div className="w-9 h-9 rounded-lg bg-slate-100 dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+              <span className="material-symbols-outlined text-[19px]">verified</span>
             </div>
           </div>
 
-          <div className="bg-white dark:bg-[#0f172a] rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-xs flex items-center justify-between">
+          <div className="bg-white dark:bg-[#111827] rounded-xl p-4 border border-slate-200/80 dark:border-slate-800 shadow-xs flex items-center justify-between">
             <div>
               <div className="text-[11px] font-mono text-slate-400 uppercase tracking-wider">Work Orders</div>
-              <div className="text-2xl font-black text-amber-600 dark:text-amber-400 mt-0.5">{workOrders.length}</div>
+              <div className="text-xl sm:text-2xl font-bold text-amber-600 dark:text-amber-400 mt-0.5">{workOrders.length}</div>
             </div>
-            <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center">
-              <span className="material-symbols-outlined text-xl">assignment</span>
+            <div className="w-9 h-9 rounded-lg bg-slate-100 dark:bg-slate-800 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+              <span className="material-symbols-outlined text-[19px]">assignment</span>
             </div>
           </div>
         </div>
